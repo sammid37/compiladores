@@ -1,0 +1,19 @@
+program Exemplo6;
+var
+  num1, num2, resultado: real;
+
+procedure Multiplica(a, b: real);
+begin
+  { Procedimento para multiplicação }
+  resultado := a * b;
+  writeln('O resultado da multiplicação é: ', resultado);
+end;
+
+begin
+  { Solicita entrada do usuário }
+  writeln('Digite dois números:');
+  readln(num1, num2);
+
+  { Chama o procedimento Multiplica com parâmetros }
+  Multiplica(num1, num2);
+end.

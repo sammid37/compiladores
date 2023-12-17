@@ -1,0 +1,18 @@
+program Exemplo9;
+var
+  nome: string;
+
+procedure Saudacao(nome: string);
+begin
+  { Procedimento com saída formatada }
+  writeln('Olá, ', nome, '! Bem-vindo ao programa Pascal.');
+end;
+
+begin
+  { Solicita entrada do usuário }
+  writeln('Digite seu nome:');
+  readln(nome);
+
+  { Chama o procedimento de saudação }
+  Saudacao(nome);
+end.

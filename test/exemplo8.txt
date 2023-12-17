@@ -1,0 +1,17 @@
+program Exemplo8;
+var
+  contador: integer;
+
+begin
+  contador := 1;
+
+  { Loop usando repeat-until }
+  repeat
+    writeln('Contador: ', contador);
+    contador := contador + 1;
+  until contador > 5;
+
+  { Uso de 'not' para negação }
+  if not (contador = 6) then
+    writeln('Loop concluído');
+end.

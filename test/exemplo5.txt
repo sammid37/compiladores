@@ -1,0 +1,13 @@
+program Exemplo5;
+var
+  i: integer;
+
+begin
+  { Loop usando for }
+  for i := 1 to 5 do
+    writeln('Contagem: ', i);
+
+  { Uso de booleano e estrutura condicional }
+  if i > 5 then
+    writeln('A contagem ultrapassou 5');
+end.

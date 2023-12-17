@@ -1,0 +1,18 @@
+program Exemplo7;
+var
+  escolha: integer;
+
+begin
+  { Solicita escolha do usuário }
+  writeln('Escolha uma opção (1-3):');
+  readln(escolha);
+
+  { Estrutura case para diferentes opções }
+  case escolha of
+    1: writeln('Você escolheu a opção 1');
+    2: writeln('Você escolheu a opção 2');
+    3: writeln('Você escolheu a opção 3');
+  else
+    writeln('Opção inválida');
+  end;
+end.

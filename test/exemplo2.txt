@@ -1,0 +1,14 @@
+program Exemplo2;
+var
+  i: integer;
+
+begin
+  i := 1;
+
+  { Loop usando while }
+  while i <= 5 do
+  begin
+    writeln('Contagem: ', i);
+    i := i + 1;
+  end;
+end.

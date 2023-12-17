@@ -1,0 +1,19 @@
+program Exemplo4;
+var
+  a, b, resultado: integer;
+
+begin
+  { Solicita entrada do usuário }
+  writeln('Digite dois números:');
+  readln(a, b);
+
+  { Realiza operações aritméticas e exibe o resultado }
+  resultado := a + b * 2;
+  writeln('O resultado é: ', resultado);
+
+  { Estrutura de controle baseada no resultado }
+  if resultado > 10 then
+    writeln('Resultado é maior que 10')
+  else
+    writeln('Resultado é menor ou igual a 10');
+end.

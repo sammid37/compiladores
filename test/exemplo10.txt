@@ -1,0 +1,18 @@
+program Exemplo10;
+var
+  idade: integer;
+  ehAdulto: boolean;
+
+begin
+  { Solicita idade do usuário }
+  writeln('Digite sua idade:');
+  readln(idade);
+
+  { Operações lógicas e estrutura if-else }
+  ehAdulto := (idade >= 18);
+
+  if ehAdulto then
+    writeln('Você é maior de idade.')
+  else
+    writeln('Você é menor de idade.');
+end.

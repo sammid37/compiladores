@@ -1,0 +1,16 @@
+program Exemplo3;
+var
+  a, b: integer;
+
+procedure Soma;
+begin
+  writeln('A soma é: ', a + b);
+end;
+
+begin
+  a := 8;
+  b := 12;
+
+  { Chama a procedure Soma }
+  Soma;
+end.
