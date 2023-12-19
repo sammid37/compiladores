@@ -48,27 +48,31 @@ class Lexer:
         # Se não encontrar o caractere de fechamento, isso indica um erro de comentário não fechado
         if closing_brace_index == -1:
           raise SyntaxError("Erro: Comentário não fechado.")
-        
+  
+        # Contagem de linhas dentro do comentário
+        comment_content = self.input_code[self.position+1:closing_brace_index] # fatiamento
+        self.line_number += comment_content.count('\n')
+
         # Move a posição para o caractere seguinte ao '}'
         self.position = closing_brace_index + 1
-        
+
         # Continua para o próximo caractere
         continue
 
       # Verifique se a palavra é uma palavra reservada
-      if re.match(r'[a-zA-Z]', self.input_code[self.position:]):
-        match = re.match(r'[a-zA-Z]+\d*', self.input_code[self.position:])
+      if re.match(r'[a-zA-Z]\w*', self.input_code[self.position:]):
+        match = re.match(r'[a-zA-Z]\w*', self.input_code[self.position:])
         value = match.group()
 
         # Verifique se a palavra é uma palavra reservada
         if value.lower() in rw:
-          token_type = 'PALAVRA RESERVADA'
+          token_type = 'Palavra reservada'
         elif value.lower() in op_a: 
-          token_type = 'OP ADITIVO'
+          token_type = 'Operador aditivo'
         elif value.lower() in op_m: 
-          token_type = 'OP MULTIPLICATIVO'
+          token_type = 'Operador multiplicativo'
         else:
-          token_type = 'ID'
+          token_type = 'Identificador'
 
         self.tokens.append(Token(token_type, value, self.line_number))
         self.position += len(value)
@@ -127,7 +131,7 @@ class Lexer:
       self.position += 1    
 
       # Se não corresponder a nenhum padrão, gera um erro
-      raise ValueError(f"Erro léxico: caractere inválido '{self.input_code[self.position]}' na linha {self.line_number}")
+      raise ValueError(f"Erro léxico: caractere inválido '{self.input_code[self.position]}' na linha {self.line_number}, posição {self.position}")
 
     # Retorna tokens classificados :)
     return self.tokens
