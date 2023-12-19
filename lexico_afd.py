@@ -13,19 +13,18 @@ class AnalisadorLexico:
 
     def analisar_codigo(self, codigo):
         linhas = codigo.split('\n')
-        for linha in linhas[1:]:  # A primeira linha é ignorada
+        for linha in linhas:
             self.numero_da_linha += 1  # Incremento do contador de linha
             self.analisar_linha(linha)
 
     def analisar_linha(self, linha):
-        #Verifica se a linha contém apenas palavras-chave
+        # Verifica se a linha contém apenas palavras-chave
         if linha.strip() and all(word.strip() in ['program', 'var', 'integer', 'real', 'boolean', 'procedure', 'begin', 'end', 'if', 'then', 'else', 'while', 'do', 'not'] for word in linha.split()):
             self.adicionar_a_tabela_de_simbolos(linha.strip(), 'Palavra-chave')
             return  # Não processa caracteres individuais se toda a linha é uma palavra-chave
 
         for char in linha:
             self.processar_char(char)
-
 
     def processar_char(self, char):
         if char == '{':
@@ -147,18 +146,13 @@ class AnalisadorLexico:
             for entrada in self.tabela_simbolos:
                 escritor.writerow(entrada)
 
+# Leitura do arquivo de entrada
+source_file = 'entrada.txt'
+
+with open(source_file, 'r') as f:
+    source_code = f.read()
+
 # Exemplo de uso
-codigo_exemplo = """
-program teste; {programa exemplo}
-var
-    valor1: integer;
-    valor2: real;
-begin
-    valor1 := 10;
-end.
-"""
-
-
 analisador = AnalisadorLexico()
-analisador.analisar_codigo(codigo_exemplo)
+analisador.analisar_codigo(source_code)
 analisador.salvar_em_csv()
