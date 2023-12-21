@@ -1,5 +1,10 @@
 import csv
 
+class ComentarioNaoFechadoErro(Exception):
+    def __init__(self, linha, posicao):
+        self.linha = linha
+        super().__init__(f"Comentario aberto e nao fechado encontrado na linha {linha}.")
+
 class AnalisadorLexico:
     def __init__(self):
         self.tabela_simbolos = []
@@ -13,23 +18,35 @@ class AnalisadorLexico:
 
     def analisar_codigo(self, codigo):
         linhas = codigo.split('\n')
-        for linha in linhas:
+        for linha in linhas:  # Processa todas as linhas
             self.numero_da_linha += 1  # Incremento do contador de linha
             self.analisar_linha(linha)
 
+        # Verifica se há um comentário aberto no final do arquivo
+        if self.comentario_aberto:
+            raise ComentarioNaoFechadoErro(self.numero_da_linha, len(codigo) + 1)
+
     def analisar_linha(self, linha):
         # Verifica se a linha contém apenas palavras-chave
-        if linha.strip() and all(word.strip() in ['program', 'var', 'integer', 'real', 'boolean', 'procedure', 'begin', 'end', 'if', 'then', 'else', 'while', 'do', 'not'] for word in linha.split()):
+        if linha.strip() and all(word.strip() in ['program', 'var', 'integer', 'real', 'boolean', 'procedure', 'begin', 'end', 'if', 'then', 'else', 'while', 'do', 'not', 'or', 'and'] for word in linha.split()):
             self.adicionar_a_tabela_de_simbolos(linha.strip(), 'Palavra-chave')
             return  # Não processa caracteres individuais se toda a linha é uma palavra-chave
 
-        for char in linha:
-            self.processar_char(char)
+        for posicao, char in enumerate(linha, start=1):
+            self.processar_char(char, posicao)
 
-    def processar_char(self, char):
+        # Verifica se o comentário está aberto no final da linha
+        if self.comentario_aberto:
+            raise ComentarioNaoFechadoErro(self.numero_da_linha, len(linha) + 1)
+
+    def processar_char(self, char, posicao):
         if char == '{':
+            if self.comentario_aberto:
+                raise ComentarioNaoFechadoErro(self.numero_da_linha, posicao)
             self.comentario_aberto = True
         elif char == '}':
+            if not self.comentario_aberto:
+                raise ComentarioNaoFechadoErro(self.numero_da_linha, posicao)
             self.comentario_aberto = False
         elif self.comentario_aberto:
             pass
@@ -66,7 +83,7 @@ class AnalisadorLexico:
                 self.buffer += char
             else:
                 self.adicionar_identificador_ou_palavra_chave()
-                self.processar_char(char)
+                self.processar_char(char, posicao)
         elif self.estado == 2:  # Número Inteiro
             if char.isdigit():
                 self.buffer += char
@@ -74,13 +91,13 @@ class AnalisadorLexico:
                 self.buffer += char
                 self.estado = 3
             elif char.isalpha() or char == '_':
-                self.adicionar_a_tabela_de_simbolos(self.buffer, 'Erro - Identificador invalido')
+                self.adicionar_a_tabela_de_simbolos(self.buffer, 'Erro - Identificador inválido')
                 self.reset_buffer_and_estado()
-                self.processar_char(char)
+                self.processar_char(char, posicao)
             else:
                 self.adicionar_a_tabela_de_simbolos(self.buffer, 'Numero Inteiro')
                 self.reset_buffer_and_estado()
-                self.processar_char(char)
+                self.processar_char(char, posicao)
 
         elif self.estado == 3:  # Parte Decimal de Número Real
             if char.isdigit():
@@ -89,19 +106,19 @@ class AnalisadorLexico:
             else:
                 self.adicionar_a_tabela_de_simbolos(self.buffer, 'Erro - Numero Real inválido')
                 self.reset_buffer_and_estado()
-                self.processar_char(char)
+                self.processar_char(char, posicao)
 
         elif self.estado == 4:  # Número Real
             if char.isdigit():
                 self.buffer += char
             elif char.isalpha() or char == '_':
-                self.adicionar_a_tabela_de_simbolos(self.buffer, 'Erro - Identificador invalido')
+                self.adicionar_a_tabela_de_simbolos(self.buffer, 'Erro - Identificador inválido')
                 self.reset_buffer_and_estado()
-                self.processar_char(char)
+                self.processar_char(char, posicao)
             else:
                 self.adicionar_a_tabela_de_simbolos(self.buffer, 'Número Real')
                 self.reset_buffer_and_estado()
-                self.processar_char(char)
+                self.processar_char(char, posicao)
 
         elif self.estado == 5:  # Comando de atribuição :=
             if char == '=':
@@ -111,24 +128,44 @@ class AnalisadorLexico:
             else:
                 self.adicionar_a_tabela_de_simbolos(self.buffer, 'Delimitador')
                 self.reset_buffer_and_estado()
-                self.processar_char(char)
+                self.processar_char(char, posicao)
 
         elif self.estado == 6:  # Operadores relacionais
+            if char == '=' or char == '>':
+                self.buffer += char
+                self.adicionar_a_tabela_de_simbolos(self.buffer, 'Operador Relacional')
+                self.reset_buffer_and_estado()
+            elif char == '<':
+                self.buffer += char
+                self.estado = 7
+            else:
+                self.adicionar_a_tabela_de_simbolos(self.buffer, 'Erro - Símbolo não pertencente à linguagem')
+                self.reset_buffer_and_estado()
+                self.processar_char(char, posicao)
+
+        elif self.estado == 7:  # Operador Relacional '<>'
+            if char == '>':
+                self.buffer += char
+                self.adicionar_a_tabela_de_simbolos(self.buffer, 'Operador Relacional')
+                self.reset_buffer_and_estado()
+            else:
+                self.adicionar_a_tabela_de_simbolos(self.buffer, 'Erro - Símbolo não pertencente à linguagem')
+                self.reset_buffer_and_estado()
+                self.processar_char(char, posicao)
+
+        elif self.estado == 8:  # Operador Relacional '<'
             if char == '=':
                 self.buffer += char
                 self.adicionar_a_tabela_de_simbolos(self.buffer, 'Operador Relacional')
                 self.reset_buffer_and_estado()
-            elif char in ['<', '>']:
-                self.adicionar_a_tabela_de_simbolos(self.buffer, 'Erro - Símbolo não pertencente a linguagem')
-                self.reset_buffer_and_estado()
-                self.processar_char(char)
             else:
-                self.adicionar_a_tabela_de_simbolos(self.buffer, 'Operador Relacional')
+                self.adicionar_a_tabela_de_simbolos(self.buffer, 'Erro - Símbolo não pertencente à linguagem')
                 self.reset_buffer_and_estado()
+                self.processar_char(char, posicao)
 
     def adicionar_identificador_ou_palavra_chave(self):
-        if self.buffer.lower() in ['program', 'var', 'integer', 'real', 'boolean', 'procedure', 'begin', 'end', 'if', 'then', 'else', 'while', 'do', 'not']:
-            self.adicionar_a_tabela_de_simbolos(self.buffer, 'Palavra-chave')
+        if self.buffer.lower() in ['program', 'var', 'integer', 'real', 'boolean', 'procedure', 'begin', 'end', 'if', 'then', 'else', 'while', 'do', 'not', 'or', 'and']:
+            self.adicionar_a_tabela_de_simbolos(self.buffer, 'Palavra reservada')
         else:
             self.adicionar_a_tabela_de_simbolos(self.buffer, 'Identificador')
         self.reset_buffer_and_estado()
