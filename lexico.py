@@ -152,7 +152,7 @@ tokens = lexer.tokenize()
 #   print(token)
 
 # Gernado a saída em um arquivo .CSV
-with open('saida.csv', 'r+', newline='') as csvfile:
+with open('lexico.csv', 'r+', newline='') as csvfile:
   fieldnames = ['Token', 'Classificação', 'Linha']
   writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
