@@ -7,6 +7,7 @@ import csv
 
 from constantes import *
 
+# Definição de um Token: tipo, valor e linha onde se localiza
 class Token:
   def __init__(self, token_type, value, line):
     self.type = token_type
@@ -17,10 +18,10 @@ class Token:
     return f"({self.value}, {self.type}, linha {self.line})"
 
 class Sintatico:
-  def __init__(self, tokens, output_file):
+  def __init__(self, tokens, output_file, input_file):
     self.tokens = tokens # a lista de tokens (formado por uma tupla << type, value, line >>)
-    self.posicao = 0 # posição na lista de tuplas
-    self.pilha = []
+    self.posicao = 0 # ? posição do token na lista de tuplas
+    self.input_file = input_file
     self.output_file = output_file
 
   def avancar(self):
@@ -49,101 +50,96 @@ class Sintatico:
     self.f_program()
     self.f_id()
     self.f_delimiter()
-
-    self.f_comando_composto() 
-
+    
     # TODO: chamada de 
     # -[] declarações_variáveis
     # -[] declarações_de_subprogramas
     # -[] comando_composto
-     
+
+    self.f_comando_composto() # TODO: está incompleto!
+    
+    self.f_delimiter()
+ 
   # TODO: método para gerar a saída do Analisador Sintático
     
   # TODO: definição de regras gramaticais a seguir
   # As regras gramaticais farão uso do método consumir()
 
-  def f_program(self):
-    token_atual = self.tokens[self.posicao]
-    if(token_atual.value) == 'program':
-      self.consumir(token_atual.type)
+  def f_program(self): 
+    if(self.tokens[self.posicao].value) == 'program':
+      self.consumir(self.tokens[self.posicao].type)
     else: 
       # TODO: chamada de função para escrever em documento de saída
-      raise SyntaxError(f"Esperava palavra reservada program, mas foi encontrado {token_atual.value}")
+      raise SyntaxError(f"Esperava palavra reservada program, mas foi encontrado {self.tokens[self.posicao].value}")
 
-  def f_id(self):
-    token_atual = self.tokens[self.posicao]
-    self.consumir(token_atual.type)
+  def f_id(self): 
+    # TODO: verificar se é necessário fazer um tratamento para tokens do tipo ID
+    self.consumir(self.tokens[self.posicao].type)
   
-  def f_delimiter(self):
-    token_atual = self.tokens[self.posicao]
-    print(token_atual)
-    if token_atual.value in DELIMITER:
-      print("Delimitador yay")
-      self.consumir(token_atual.type)
+  def f_delimiter(self): 
+    if self.tokens[self.posicao].value in DELIMITER:
+      self.consumir(self.tokens[self.posicao].type)
     else:
       # TODO: chamada de função para escrever em documento de saída
-      raise SyntaxError(f"Esperava delimitador, mas foi encontrado {token_atual.value} na linha {token_atual.line}")
+      raise SyntaxError(f"Esperava delimitador, mas foi encontrado {self.tokens[self.posicao].value} na linha {self.tokens[self.posicao].line}")
 
   # * Regras não dependentes
   def f_op_aditivo(self):
-    token_atual = self.tokens[self.posicao]
-    if token_atual.value in OP_ADITIVO:
-      self.consumir(token_atual.type)
-    else:
-      # TODO: chamada de função para escrever em documento de saída
-      raise SyntaxError(f"Esperava operador aditivo, mas foi encontrado {token_atual.type}")
 
-  def f_op_multiplicativo(self): 
-    token_atual = self.tokens[self.posicao]
-    if token_atual.value in OP_MULTIPLICATIVO:
-      self.consumir(token_atual.type)
+    if self.tokens[self.posicao].value in OP_ADITIVO:
+      self.consumir(self.tokens[self.posicao].type)
     else:
       # TODO: chamada de função para escrever em documento de saída
-      raise SyntaxError(f"Esperava operador multiplicativo, mas foi encontrado {token_atual.type}")
+      raise SyntaxError(f"Esperava operador aditivo, mas foi encontrado {self.tokens[self.posicao].type}")
+
+  def f_op_multiplicativo(self):  
+    if self.tokens[self.posicao].value in OP_MULTIPLICATIVO:
+      self.consumir(self.tokens[self.posicao].type)
+    else:
+      # TODO: chamada de função para escrever em documento de saída
+      raise SyntaxError(f"Esperava operador multiplicativo, mas foi encontrado {self.tokens[self.posicao].type}")
 
   def f_op_relacional(self):
-    token_atual = self.tokens[self.posicao]
-    if token_atual.value in OP_RELACIONAL:
-      self.consumir(token_atual.type)
+    if self.tokens[self.posicao].value in OP_RELACIONAL:
+      self.consumir(self.tokens[self.posicao].type)
     else:
       # TODO: chamada de função para escrever em documento de saída
-      raise SyntaxError(f"Esperava operador relacional, mas foi encontrado {token_atual.type}")
+      raise SyntaxError(f"Esperava operador relacional, mas foi encontrado {self.tokens[self.posicao].type}")
 
   def f_sinal(self):
-    token_atual = self.tokens[self.posicao]
-    if token_atual.value in SINAL:
-      self.consumir(token_atual.type)
+    if self.tokens[self.posicao].value in SINAL:
+      self.consumir(self.tokens[self.posicao].type)
     else:
       # TODO: chamada de função para escrever em documento de saída
-      raise SyntaxError(f"Esperava sinal, mas foi encontrado {token_atual.type}")
+      raise SyntaxError(f"Esperava sinal, mas foi encontrado {self.tokens[self.posicao].type}")
     
   def f_tipo(self):
-    token_atual = self.tokens[self.posicao].value
-    if token_atual in TIPO:
-      self.consumir(token_atual.type)
+    if self.tokens[self.posicao].value in TIPO:
+      self.consumir(self.tokens[self.posicao].type)
     else:
       # TODO: chamada de função para escrever em documento de saída
-      raise SyntaxError(f"Esperava sinal, mas foi encontrado {token_atual.tipo}")
+      raise SyntaxError(f"Esperava sinal, mas foi encontrado {self.tokens[self.posicao].tipo}")
 
   # * Regras dependentes simples
+    
   # * Regras dependentes mais complexas
   def f_comando_composto(self):
-
-    token_atual = self.tokens[self.posicao]
-    print(token_atual)
-    if(token_atual.value) == 'begin':
+    if(self.tokens[self.posicao].value) == 'begin':
       self.consumir('Palavra reservada')
     else: 
       # TODO: chamada de função para escrever em documento de saída
-      raise SyntaxError(f"Esperava palavra reservada begin, mas foi encontrado {token_atual.value}")
+      raise SyntaxError(f"Esperava palavra reservada begin, mas foi encontrado {self.tokens[self.posicao].value}")
     
     # TODO: chama f_comandos_opcionais()
+    # self.avancar()
+    # print("avancei")
+    # print(self.tokens[self.posicao])
 
-    if(token_atual.value) == 'end':
+    if(self.tokens[self.posicao].value) == 'end':
       self.consumir('Palavra reservada')
     else: 
       # TODO: chamada de função para escrever em documento de saída
-      raise SyntaxError(f"Esperava palavra reservada end, mas foi encontrado {token_atual.value}")
+      raise SyntaxError(f"Esperava palavra reservada end, mas foi encontrado {self.tokens[self.posicao].value}")
     
 # Main do Analisador Sintático
 # Lendo arquivo de entrada
