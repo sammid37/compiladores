@@ -17,6 +17,7 @@ class Token:
   def __str__(self):
     return f"({self.value}, {self.type}, linha {self.line})"
 
+# Definição de um Analisador Sintático
 class Sintatico:
   def __init__(self, tokens, output_file, input_file):
     self.tokens = tokens # a lista de tokens (formado por uma tupla << type, value, line >>)
@@ -24,9 +25,11 @@ class Sintatico:
     self.input_file = input_file
     self.output_file = output_file
 
+  # Avança na leitura de tokens
   def avancar(self):
     self.posicao += 1
 
+  # Verifica se um tipo corresponde ao esperado
   def verificar(self, tipo):
     return self.tokens[self.posicao].type == tipo
 
@@ -44,9 +47,9 @@ class Sintatico:
     self.programa()
     print("Análise sintática concluída com sucesso.")
 
-  # TODO: realiza a chamada das gramáticas
   def programa(self):
     # Inicial: verificar se o arquivo começa com: << program id ; >>
+    # Está funcional, mas talvez precise melhorar
     self.f_program()
     self.f_id()
     self.f_delimiter()
@@ -61,10 +64,8 @@ class Sintatico:
     self.f_delimiter()
  
   # TODO: método para gerar a saída do Analisador Sintático
-    
-  # TODO: definição de regras gramaticais a seguir
-  # As regras gramaticais farão uso do método consumir()
 
+  # ---------------------------------------------------------------------- REGRAS
   def f_program(self): 
     if(self.tokens[self.posicao].value) == 'program':
       self.consumir(self.tokens[self.posicao].type)
@@ -75,7 +76,7 @@ class Sintatico:
   def f_id(self): 
     # TODO: verificar se é necessário fazer um tratamento para tokens do tipo ID
     self.consumir(self.tokens[self.posicao].type)
-  
+
   def f_delimiter(self): 
     if self.tokens[self.posicao].value in DELIMITER:
       self.consumir(self.tokens[self.posicao].type)
@@ -85,7 +86,6 @@ class Sintatico:
 
   # * Regras não dependentes
   def f_op_aditivo(self):
-
     if self.tokens[self.posicao].value in OP_ADITIVO:
       self.consumir(self.tokens[self.posicao].type)
     else:
@@ -120,9 +120,19 @@ class Sintatico:
       # TODO: chamada de função para escrever em documento de saída
       raise SyntaxError(f"Esperava sinal, mas foi encontrado {self.tokens[self.posicao].tipo}")
 
-  # * Regras dependentes simples
-    
-  # * Regras dependentes mais complexas
+  # ** Regras dependentes simples
+  def f_fator(self): pass
+  def f_expressao_simples(self): pass
+  def f_expressao(self): pass
+  def f_lista_de_expressao(self): pass
+  def f_termo(self): pass
+  def f_ativacao_procedimento(self): pass
+
+  # *** Regras dependentes mais complexas
+  def f_comando(self): pass
+  def f_lista_comandos(self): pass
+  def f_comandos_opcionais(self): pass
+
   def f_comando_composto(self):
     if(self.tokens[self.posicao].value) == 'begin':
       self.consumir('Palavra reservada')
@@ -140,8 +150,18 @@ class Sintatico:
     else: 
       # TODO: chamada de função para escrever em documento de saída
       raise SyntaxError(f"Esperava palavra reservada end, mas foi encontrado {self.tokens[self.posicao].value}")
-    
-# Main do Analisador Sintático
+
+  # ??? SEM CATEGORIA, ORGANIZAR!!
+  def f_variavel(self): pass
+  def f_lista_de_parametros(self): pass
+  def f_argumentos(self): pass
+  def f_declaracao_de_subprograma(self): pass
+  def f_declaracoes_de_subprogramas(self): pass
+  def f_lista_de_identificadores(self): pass
+  def f_lista_declaracoes_variaveis(self): pass
+  def f_declaracoes_variaveis(self): pass
+  
+# -------------------------------------------------------- Main do Analisador Sintático
 # Lendo arquivo de entrada
 def ler_tokens(nome_do_arquivo):
   tokens = []
@@ -159,5 +179,5 @@ tokens = ler_tokens(source_file)
 # for token in tokens:
 #   print(f'Tipo: {token.type}, Valor: {token.value}, Linha: {token.line}')
 
-analisador = Sintatico(tokens, output_file="sintatico.csv")
+analisador = Sintatico(tokens, output_file=output_file, input_file=source_file)
 analisador.analisar()
