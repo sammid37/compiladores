@@ -1,0 +1,16 @@
+program SomaDeInteiros;
+
+var
+  numero1, numero2, soma: Integer;
+
+begin
+  {Atribui valores às variáveis}
+  numero1 := 10;
+  numero2 := 20;
+  
+  {Calcula a soma}
+  soma := numero1 + numero2;
+  
+  {Imprime o resultado da soma}
+  {writeln('A soma de ', numero1, ' e ', numero2, ' é ', soma);}
+end.
