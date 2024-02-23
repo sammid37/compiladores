@@ -5,6 +5,9 @@
 import re
 import csv
 
+from constantes import *
+
+# Definição de um Token: tipo, valor e linha onde se localiza
 class Token:
   def __init__(self, token_type, value, line):
     self.type = token_type
@@ -14,16 +17,19 @@ class Token:
   def __str__(self):
     return f"({self.value}, {self.type}, linha {self.line})"
 
+# Definição de um Analisador Sintático
 class Sintatico:
-  def __init__(self, tokens, output_file):
-    self.tokens = tokens
-    self.posicao = 0
-    self.pilha = []
+  def __init__(self, tokens, output_file, input_file):
+    self.tokens = tokens # a lista de tokens (formado por uma tupla << type, value, line >>)
+    self.posicao = 0 # ? posição do token na lista de tuplas
+    self.input_file = input_file
     self.output_file = output_file
 
+  # Avança na leitura de tokens
   def avancar(self):
     self.posicao += 1
 
+  # Verifica se um tipo corresponde ao esperado
   def verificar(self, tipo):
     return self.tokens[self.posicao].type == tipo
 
@@ -38,24 +44,124 @@ class Sintatico:
     
   # A análise sintática é concluída ao passar por todas as regras gramaticias da linguagem
   def analisar(self):
-    # self.programa()
+    self.programa()
     print("Análise sintática concluída com sucesso.")
 
-  # TODO: realiza a chamada das gramáticas
   def programa(self):
-    pass 
-
-  # TODO: método para gerar a saída do Analisador Sintático
+    # Inicial: verificar se o arquivo começa com: << program id ; >>
+    # Está funcional, mas talvez precise melhorar
+    self.f_program()
+    self.f_id()
+    self.f_delimiter()
     
-  # TODO: definição de regras gramaticais a seguir
-    # As regras gramaticais farão uso do método consumir()
+    # TODO: chamada de 
+    # -[] declarações_variáveis
+    # -[] declarações_de_subprogramas
+    # -[] comando_composto
+
+    self.f_comando_composto() # TODO: está incompleto!
+    
+    self.f_delimiter()
+ 
+  # TODO: método para gerar a saída do Analisador Sintático
+
+  # ---------------------------------------------------------------------- REGRAS
+  def f_program(self): 
+    if(self.tokens[self.posicao].value) == 'program':
+      self.consumir(self.tokens[self.posicao].type)
+    else: 
+      # TODO: chamada de função para escrever em documento de saída
+      raise SyntaxError(f"Esperava palavra reservada program, mas foi encontrado {self.tokens[self.posicao].value}")
+
+  def f_id(self): 
+    # TODO: verificar se é necessário fazer um tratamento para tokens do tipo ID
+    self.consumir(self.tokens[self.posicao].type)
+
+  def f_delimiter(self): 
+    if self.tokens[self.posicao].value in DELIMITER:
+      self.consumir(self.tokens[self.posicao].type)
+    else:
+      # TODO: chamada de função para escrever em documento de saída
+      raise SyntaxError(f"Esperava delimitador, mas foi encontrado {self.tokens[self.posicao].value} na linha {self.tokens[self.posicao].line}")
 
   # * Regras não dependentes
-  # * Regras dependentes simples
-  # * Regras dependentes mais complexas
+  def f_op_aditivo(self):
+    if self.tokens[self.posicao].value in OP_ADITIVO:
+      self.consumir(self.tokens[self.posicao].type)
+    else:
+      # TODO: chamada de função para escrever em documento de saída
+      raise SyntaxError(f"Esperava operador aditivo, mas foi encontrado {self.tokens[self.posicao].type}")
+
+  def f_op_multiplicativo(self):  
+    if self.tokens[self.posicao].value in OP_MULTIPLICATIVO:
+      self.consumir(self.tokens[self.posicao].type)
+    else:
+      # TODO: chamada de função para escrever em documento de saída
+      raise SyntaxError(f"Esperava operador multiplicativo, mas foi encontrado {self.tokens[self.posicao].type}")
+
+  def f_op_relacional(self):
+    if self.tokens[self.posicao].value in OP_RELACIONAL:
+      self.consumir(self.tokens[self.posicao].type)
+    else:
+      # TODO: chamada de função para escrever em documento de saída
+      raise SyntaxError(f"Esperava operador relacional, mas foi encontrado {self.tokens[self.posicao].type}")
+
+  def f_sinal(self):
+    if self.tokens[self.posicao].value in SINAL:
+      self.consumir(self.tokens[self.posicao].type)
+    else:
+      # TODO: chamada de função para escrever em documento de saída
+      raise SyntaxError(f"Esperava sinal, mas foi encontrado {self.tokens[self.posicao].type}")
     
-# Main do Analisador Sintático
+  def f_tipo(self):
+    if self.tokens[self.posicao].value in TIPO:
+      self.consumir(self.tokens[self.posicao].type)
+    else:
+      # TODO: chamada de função para escrever em documento de saída
+      raise SyntaxError(f"Esperava sinal, mas foi encontrado {self.tokens[self.posicao].tipo}")
+
+  # ** Regras dependentes simples
+  def f_fator(self): pass
+  def f_expressao_simples(self): pass
+  def f_expressao(self): pass
+  def f_lista_de_expressao(self): pass
+  def f_termo(self): pass
+  def f_ativacao_procedimento(self): pass
+
+  # *** Regras dependentes mais complexas
+  def f_comando(self): pass
+  def f_lista_comandos(self): pass
+  def f_comandos_opcionais(self): pass
+
+  def f_comando_composto(self):
+    if(self.tokens[self.posicao].value) == 'begin':
+      self.consumir('Palavra reservada')
+    else: 
+      # TODO: chamada de função para escrever em documento de saída
+      raise SyntaxError(f"Esperava palavra reservada begin, mas foi encontrado {self.tokens[self.posicao].value}")
+    
+    # TODO: chama f_comandos_opcionais()
+    # self.avancar()
+    # print("avancei")
+    # print(self.tokens[self.posicao])
+
+    if(self.tokens[self.posicao].value) == 'end':
+      self.consumir('Palavra reservada')
+    else: 
+      # TODO: chamada de função para escrever em documento de saída
+      raise SyntaxError(f"Esperava palavra reservada end, mas foi encontrado {self.tokens[self.posicao].value}")
+
+  # ??? SEM CATEGORIA, ORGANIZAR!!
+  def f_variavel(self): pass
+  def f_lista_de_parametros(self): pass
+  def f_argumentos(self): pass
+  def f_declaracao_de_subprograma(self): pass
+  def f_declaracoes_de_subprogramas(self): pass
+  def f_lista_de_identificadores(self): pass
+  def f_lista_declaracoes_variaveis(self): pass
+  def f_declaracoes_variaveis(self): pass
   
+# -------------------------------------------------------- Main do Analisador Sintático
 # Lendo arquivo de entrada
 def ler_tokens(nome_do_arquivo):
   tokens = []
@@ -63,13 +169,15 @@ def ler_tokens(nome_do_arquivo):
     leitor = csv.DictReader(csvfile)
     for linha in leitor:
       # criando uma tupla com o próprio token, o seu tipo e a linha que se encontra
-      tokens.append(Token(linha['Token'], linha['Classificação'], int(linha['Linha'])))
+      tokens.append(Token(linha['Classificação'], linha['Token'], int(linha['Linha'])))
   return tokens
 
 source_file = 'lexico.csv'
 output_file = 'sintatico.csv'  # Nome do arquivo de saída
 
 tokens = ler_tokens(source_file)
+# for token in tokens:
+#   print(f'Tipo: {token.type}, Valor: {token.value}, Linha: {token.line}')
 
-analisador = Sintatico(tokens, output_file="sintatico.csv")
+analisador = Sintatico(tokens, output_file=output_file, input_file=source_file)
 analisador.analisar()

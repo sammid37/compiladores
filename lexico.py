@@ -137,7 +137,7 @@ class Lexer:
     return self.tokens
 
 # Lendo arquivo de entrada
-source_file = 'entrada.txt'
+source_file = 'test/syntax_tests/nada.txt'
 
 with open(source_file, 'r') as f: 
   source_code = f.read()
