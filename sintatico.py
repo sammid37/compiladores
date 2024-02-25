@@ -51,7 +51,7 @@ class Sintatico:
     # Inicial: verificar se o arquivo começa com: << program id ; >>
     # Está funcional, mas talvez precise melhorar
     self.f_program()
-    self.f_id()
+    self.f_id() 
     self.f_delimiter()
     
     # TODO: chamada de 
@@ -63,7 +63,15 @@ class Sintatico:
     
     self.f_delimiter()
  
-  # TODO: método para gerar a saída do Analisador Sintático
+  # TODO: método para gerar a saída do Analisador Sintático //enthony
+    def gerar_saida(self): 
+      with open(self.output_file, 'w') as csvfile: #fazendo a escrita do arquivo de saída
+        writer = csv.writer(csvfile) #criando um objeto para escrita
+        writer.writerow(['Classificação', 'Token', 'Linha']) #escrevendo o cabeçalho
+
+      for token in self.tokens: #percorrendo a lista de tokens
+        writer.writerow([token.type, token.value, token.line]) #escrevendo os tokens no arquivo de saída
+    
 
   # ---------------------------------------------------------------------- REGRAS
   def f_program(self): 
@@ -71,10 +79,18 @@ class Sintatico:
       self.consumir(self.tokens[self.posicao].type)
     else: 
       # TODO: chamada de função para escrever em documento de saída
+
+
+
       raise SyntaxError(f"Esperava palavra reservada program, mas foi encontrado {self.tokens[self.posicao].value}")
 
   def f_id(self): 
     # TODO: verificar se é necessário fazer um tratamento para tokens do tipo ID
+
+    #if(self.tokens[self.posicao].type) == 'ID':
+      
+
+
     self.consumir(self.tokens[self.posicao].type)
 
   def f_delimiter(self): 
@@ -82,6 +98,9 @@ class Sintatico:
       self.consumir(self.tokens[self.posicao].type)
     else:
       # TODO: chamada de função para escrever em documento de saída
+
+
+
       raise SyntaxError(f"Esperava delimitador, mas foi encontrado {self.tokens[self.posicao].value} na linha {self.tokens[self.posicao].line}")
 
   # * Regras não dependentes
@@ -120,13 +139,77 @@ class Sintatico:
       # TODO: chamada de função para escrever em documento de saída
       raise SyntaxError(f"Esperava sinal, mas foi encontrado {self.tokens[self.posicao].tipo}")
 
-  # ** Regras dependentes simples
-  def f_fator(self): pass
-  def f_expressao_simples(self): pass
-  def f_expressao(self): pass
-  def f_lista_de_expressao(self): pass
-  def f_termo(self): pass
-  def f_ativacao_procedimento(self): pass
+  # ** Regras dependentes simples - TENTATIVAAAAAAA 
+    
+  def f_fator(self):
+    if self.tokens[self.posicao].type == 'ID':
+        self.consumir('ID')  # Consome o token correspondente a um identificador
+        if self.tokens[self.posicao].value == '(':
+            self.consumir('(')  # Consome o token correspondente ao parêntese aberto
+            self.f_lista_de_expressoes()  # Chamada para analisar uma lista de expressões
+            if self.tokens[self.posicao].value == ')':
+                self.consumir(')')  # Consome o token correspondente ao parêntese fechado
+            else:
+                raise SyntaxError("Erro de sintaxe: esperado ')' após a lista de expressões.")
+    elif self.tokens[self.posicao].type == 'NUM_INT':
+        self.consumir('NUM_INT')  # Consome o token correspondente a um número inteiro
+    elif self.tokens[self.posicao].type == 'NUM_REAL':
+        self.consumir('NUM_REAL')  # Consome o token correspondente a um número real
+    elif self.tokens[self.posicao].type in ['TRUE', 'FALSE']:
+        self.consumir(self.tokens[self.posicao].type)  # Consome o token correspondente a verdadeiro ou falso
+    elif self.tokens[self.posicao].value == '(':
+        self.consumir('(')  # Consome o token correspondente ao parêntese aberto
+        self.f_expressao()  # Chamada para analisar uma expressão
+        if self.tokens[self.posicao].value == ')':
+            self.consumir(')')  # Consome o token correspondente ao parêntese fechado
+        else:
+            raise SyntaxError("Erro de sintaxe: esperado ')' após a expressão entre parênteses.")
+    elif self.tokens[self.posicao].value in ['+', '-']:
+        self.consumir(self.tokens[self.posicao].value)  # Consome o token correspondente ao sinal
+        self.f_fator()  # Chamada recursiva para analisar outro fator após o sinal
+    elif self.tokens[self.posicao].type == 'NOT':
+        self.consumir('NOT')  # Consome o token correspondente ao operador lógico NOT
+        self.f_fator()  # Chamada recursiva para analisar o fator após o NOT
+    else:
+        raise SyntaxError("Erro de sintaxe: fator inválido.")
+
+  def f_expressao_simples(self):
+    self.f_termo()  # Primeiro, analisa um termo
+    while self.tokens[self.posicao].value in ['+', '-']:  # Enquanto encontrar operadores de adição ou subtração
+        self.consumir(self.tokens[self.posicao].value)  # Consome o operador
+        self.f_termo()  # Em seguida, analisa outro termo
+
+  def f_expressao(self):
+    self.f_expressao_simples()  # Primeiro, analisa uma expressão simples
+    if self.tokens[self.posicao].value in OP_RELACIONAL:  # Se encontrar um operador relacional
+        self.consumir(self.tokens[self.posicao].value)  # Consome o operador relacional
+        self.f_expressao_simples()  # Em seguida, analisa outra expressão simples
+
+  def f_lista_de_expressao(self):
+    self.f_expressao()  # Analisa a primeira expressão da lista
+    while self.tokens[self.posicao].value == ',':
+        self.consumir(',')  # Consome a vírgula
+        self.f_expressao()  # Analisa a próxima expressão na lista
+
+  def f_termo(self):
+    self.f_fator()  # Analisa o primeiro fator do termo
+    while self.tokens[self.posicao].value in OP_MULTIPLICATIVO:
+        self.consumir(self.tokens[self.posicao].type)  # Consome o operador multiplicativo
+        self.f_fator()  # Analisa o próximo fator no termo
+
+  def f_ativacao_procedimento(self):
+    if self.tokens[self.posicao].type == 'ID':
+        self.consumir('ID')  # Consome o identificador do procedimento
+        if self.tokens[self.posicao].value == '(':
+            self.consumir('(')  # Consome o '('
+            self.f_lista_de_expressoes()  # Analisa a lista de expressões
+            if self.tokens[self.posicao].value == ')':
+                self.consumir(')')  # Consome o ')'
+            else:
+                raise SyntaxError(f"Esperava ')' para finalizar a chamada de procedimento, mas foi encontrado {self.tokens[self.posicao].value}")
+    else:
+        raise SyntaxError(f"Esperava um identificador de procedimento, mas foi encontrado {self.tokens[self.posicao].value}")
+
 
   # *** Regras dependentes mais complexas
   def f_comando(self): pass
