@@ -240,9 +240,41 @@ class Sintatico:
   def f_argumentos(self): pass
   def f_declaracao_de_subprograma(self): pass
   def f_declaracoes_de_subprogramas(self): pass
-  def f_lista_de_identificadores(self): pass
-  def f_lista_declaracoes_variaveis(self): pass
-  def f_declaracoes_variaveis(self): pass
+  
+  def f_lista_de_identificadores(self):
+        if self.tokens[self.posicao].type == 'ID':
+            self.consumir('ID')  # Consome o token correspondente a um identificador
+            while self.tokens[self.posicao].value == ',':
+                self.consumir(',')  # Consome a vírgula
+                self.consumir('ID')  # Consome o próximo identificador
+        else:
+            raise SyntaxError("Erro de sintaxe: esperado um identificador.")
+        
+  def f_lista_declaracoes_variaveis(self):
+        self.f_lista_de_identificadores()  # Analisa a lista de identificadores
+        self.consumir(':')  # Consome o token ':' que separa a lista de identificadores do tipo
+        self.f_tipo()  # Analisa o tipo das variáveis
+        self.f_lista_declaracoes_variaveis_linha()  # Chama o método para l
+
+  def f_lista_declaracoes_variaveis_linha(self):
+        if self.tokens[self.posicao].value == ';':
+            self.consumir(';')  # Consome o token ';
+            self.f_lista_de_identificadores()  # Analisa a lista de identificadores
+            self.consumir(':')
+            self.f_tipo()
+            self.f_lista_declaracoes_variaveis_linha()  # Chama o método recursivamente para analisar a próxima linha de declarações de variáveis
+        else:
+            raise SyntaxError("Erro de sintaxe: esperado ';' para finalizar a lista de declarações de variáveis.")
+
+  def f_declaracoes_variaveis(self):
+    if self.tokens[self.posicao].value == 'var':
+        self.consumir('Palavra reservada')
+        self.f_lista_de_identificadores()
+        self.consumir(':')
+        self.f_tipo()
+        self.f_lista_declaracoes_variaveis()
+    else:
+        raise SyntaxError(f"Esperava palavra reservada var, mas foi encontrado {self.tokens[self.posicao].value}")
   
 # -------------------------------------------------------- Main do Analisador Sintático
 # Lendo arquivo de entrada
