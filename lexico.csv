@@ -1,38 +1,30 @@
 Token,Classificação,Linha
 program,Palavra reservada,1
-DeclaracaoVariaveis,Identificador,1
-.,Delimitador,1
+SomaDeInteiros,Identificador,1
+;,Delimitador,1
 var,Palavra reservada,3
-idade,Identificador,5
-:,Delimitador,5
-Integer,Palavra reservada,5
-=,Operador relacional,5
-25,Número inteiro,5
-;,Delimitador,5
-altura,Identificador,6
-:,Delimitador,6
-Real,Palavra reservada,6
-=,Operador relacional,6
-1.75,Número real,6
-;,Delimitador,6
-temCarro,Identificador,7
-:,Delimitador,7
-Boolean,Palavra reservada,7
-=,Operador relacional,7
-True,Identificador,7
-;,Delimitador,7
-peso,Identificador,10
-:,Delimitador,10
-Real,Palavra reservada,10
-;,Delimitador,10
-quantidadeFilhos,Identificador,11
-:,Delimitador,11
-Integer,Palavra reservada,11
-;,Delimitador,11
-temGato,Identificador,12
-:,Delimitador,12
-Boolean,Palavra reservada,12
+numero1,Identificador,4
+",",Delimitador,4
+numero2,Identificador,4
+",",Delimitador,4
+soma,Identificador,4
+:,Delimitador,4
+integer,Palavra reservada,4
+;,Delimitador,4
+begin,Palavra reservada,6
+numero1,Identificador,8
+:=,Atribuição,8
+10,Número inteiro,8
+;,Delimitador,8
+numero2,Identificador,9
+:=,Atribuição,9
+20,Número inteiro,9
+;,Delimitador,9
+soma,Identificador,12
+:=,Atribuição,12
+numero1,Identificador,12
++,Operador aditivo,12
+numero2,Identificador,12
 ;,Delimitador,12
-begin,Palavra reservada,14
 end,Palavra reservada,16
 .,Delimitador,16
