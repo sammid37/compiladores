@@ -1,7 +1,38 @@
 Token,Classificação,Linha
 program,Palavra reservada,1
-Nada,Identificador,1
-;,Delimitador,1
-begin,Palavra reservada,3
-end,Palavra reservada,5
-.,Delimitador,5
+DeclaracaoVariaveis,Identificador,1
+.,Delimitador,1
+var,Palavra reservada,3
+idade,Identificador,5
+:,Delimitador,5
+Integer,Palavra reservada,5
+=,Operador relacional,5
+25,Número inteiro,5
+;,Delimitador,5
+altura,Identificador,6
+:,Delimitador,6
+Real,Palavra reservada,6
+=,Operador relacional,6
+1.75,Número real,6
+;,Delimitador,6
+temCarro,Identificador,7
+:,Delimitador,7
+Boolean,Palavra reservada,7
+=,Operador relacional,7
+True,Identificador,7
+;,Delimitador,7
+peso,Identificador,10
+:,Delimitador,10
+Real,Palavra reservada,10
+;,Delimitador,10
+quantidadeFilhos,Identificador,11
+:,Delimitador,11
+Integer,Palavra reservada,11
+;,Delimitador,11
+temGato,Identificador,12
+:,Delimitador,12
+Boolean,Palavra reservada,12
+;,Delimitador,12
+begin,Palavra reservada,14
+end,Palavra reservada,16
+.,Delimitador,16

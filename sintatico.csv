@@ -1,0 +1,5 @@
+Erro sintático na linha 1: 'Esperava o delimitador ';', mas foi encontrado <bound method Sintatico.token_atual of <__main__.Sintatico object at 0x7f1a43a8dd50>>'
+Erro sintático na linha 1: 'None'
+Erro sintático na linha 1: 'None'
+Erro sintático na linha 1: 'None'
+Erro sintático na linha 1: 'Esperava o delimitador '.', mas foi encontrado <bound method Sintatico.token_atual of <__main__.Sintatico object at 0x7f1a43a8dd50>>'
