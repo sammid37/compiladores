@@ -6,6 +6,7 @@ import re
 import csv
 
 from constantes import *
+from termcolor import colored
 
 # Definição de um Token: tipo, valor e linha onde se localiza
 class Token:
@@ -66,7 +67,9 @@ class Sintatico:
   def analisar(self):
     """Realiza a análise sintática de um programa"""
     self.programa()
-    print("Análise sintática concluída com sucesso.")
+    print(colored("-----"*8,'green'))
+    print(colored("Análise sintática concluída com sucesso.", 'green'))
+    print(colored("-----"*8,'green'))
 
   def programa(self):
     """Contém regras (subregras) de um programa em Pascal"""
@@ -171,19 +174,21 @@ class Sintatico:
         escrever_erro_sintatico(self.tokens[self.posicao])
         exit()
       else:
-        self.consumir('Delimitador')  # Consome o token correspondente ao parêntese fechado
-        print(f"[DEBUG] consumindo {self.tipo_atual()} de valor {self.token_atual()}")
-        self.consumir(self.tipo_atual())
+        if self.tipo_atual() == 'Delimitador':
+          self.consumir('Delimitador')  # Consome o token correspondente ao parêntese fechado
+        #? gambiarra de última hora, deveria trazer um erro de sintax
+        else: pass 
+        # self.consumir(self.tipo_atual())
     elif self.token_atual() == 'not':
       self.consumir('Palavra Reservada')  # Consome o token correspondente ao operador lógico NOT
       self.f_fator()  # Chamada recursiva para analisar o fator após o NOT
-    else:
-      self.mensagem_token(f"Esperava um fator, mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
-      exit()
+    # TODO: pensar em outra estratégia para tratar erros de fator
+    # else:
+    #   self.mensagem_token(f"Esperava um fator, mas foi encontrado {self.token_atual()}")
+    #   escrever_erro_sintatico(self.tokens[self.posicao])
+    #   exit()
 
   def f_expressao_simples(self):
-    print(f"[DEBUG] #D {self.token_atual()} {self.tipo_atual()}")
     if self.token_atual() in SINAL:
       self.consumir(self.tipo_atual())
       self.f_termo()
@@ -194,7 +199,7 @@ class Sintatico:
  
   def f_expressao_simples_linha(self):
     if self.token_atual() in OP_ADITIVO:
-      self.consumir(self.token_atual())
+      self.consumir(self.tipo_atual())
       self.f_termo()
       self.f_expressao_simples_linha()
 
@@ -204,7 +209,7 @@ class Sintatico:
 
   def f_expressao_linha(self):
     if self.token_atual() in OP_RELACIONAL:  # Se encontrar um operador relacional
-      self.consumir(self.tipo_atual)  # Consome o operador relacional
+      self.consumir(self.tipo_atual())  # Consome o operador relacional
       self.f_expressao_simples()  # Em seguida, analisa outra expressão simples
 
   def f_lista_de_expressao(self):
@@ -218,16 +223,14 @@ class Sintatico:
     self.f_termo_linha()
     
   def f_termo_linha(self):
-    if self.token_atual in OP_MULTIPLICATIVO:
-      self.consumir(self.tipo_atual)  # Consome o operador multiplicativo
+    if self.token_atual() in OP_MULTIPLICATIVO:
+      self.consumir('Operador multiplicativo')  # Consome o operador multiplicativo
       self.f_fator()  # Analisa o próximo fator no termo
       self.f_termo_linha()
 
   def f_ativacao_procedimento(self):
-    print(f"[DEBUG] #E1 {self.token_atual()} {self.tipo_atual()}")
     if self.tipo_atual() == 'Identificador':
       self.consumir('Identificador')  # Consome o identificador do procedimento
-      print(f"[DEBUG] #E2 {self.token_atual()} {self.tipo_atual()}")
       if self.token_atual() == '(':
         self.consumir('Delimitador')  # Consome o '('
         self.f_lista_de_expressoes()  # Analisa a lista de expressões
@@ -252,13 +255,10 @@ class Sintatico:
   # *** Regras dependentes mais complexas
   def f_comando(self): 
     """Analisa possibilidades de comando, como atrobuição, ativações de procedimentos e outros"""
-    print(f"[DEBUG] #C {self.token_atual()} {self.tipo_atual()}")
     if self.tipo_atual() == 'Identificador' and self.tokens[self.posicao + 1].type == 'Atribuição':
       self.f_variavel();
       if self.tipo_atual() == 'Atribuição':
-        print(f"[DEBUG] #A {self.token_atual()} {self.tipo_atual()}")
         self.consumir('Atribuição')
-        print(f"[DEBUG] #B {self.token_atual()} {self.tipo_atual()}")
         self.f_expressao()
     # elif self.tipo_atual() == 'Identificador' and (self.tokens[self.posicao + 1].value in OP_ADITIVO):
     #   print("É aqui!")
@@ -280,7 +280,7 @@ class Sintatico:
     elif self.token_atual() == 'while':
       self.consumir('Palavra reservada')
       self.f_expressao()
-      if self.token_atual == 'do':
+      if self.token_atual() == 'do':
         self.consumir('Palavra reservada')
         self.f_comando_composto()
       else: 
@@ -294,10 +294,10 @@ class Sintatico:
       if self.tipo_atual() == 'Atribuição':
         self.consumir('Atribuição')
         self.f_expressao()
-        if self.token_atual == 'to':
+        if self.token_atual() == 'to':
           self.consumir('Palavra reservada')
           self.f_expressao()
-          if self.token_atual == 'do':
+          if self.token_atual() == 'do':
             self.consumir('Palavra reservada')
             self.f_comando_composto()
           else:
@@ -315,16 +315,16 @@ class Sintatico:
     else:
       if self.token_atual() == 'end' and self.tokens[self.posicao + 1].value == '.':
         return "Comando avaliado com sucesso"
-      print(f"[DEBUG] {self.token_atual()} {self.tipo_atual()}")
-      self.mensagem_token(f"Comando inválido. Recebido: {self.token_atual()} de tipo {self.tipo_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
-      exit()
+      # self.mensagem_token(f"Comando inválido. Recebido: {self.token_atual()} de tipo {self.tipo_atual()}")
+      # escrever_erro_sintatico(self.tokens[self.posicao])
+      # exit()
 
   def f_lista_comandos(self): 
     self.f_comando()
     self.f_lista_comandos_linha()
   
   def f_lista_comandos_linha(self):
+    """Verifica se ao final de um comando há um delimitador ';' e se há mais comandos em linha"""
     if self.token_atual() == ';':
       self.consumir('Delimitador')
       self.f_comando()
@@ -333,17 +333,22 @@ class Sintatico:
   def f_comandos_opcionais(self):
     while self.token_atual() in ['begin', 'if', 'while', 'for'] or self.tipo_atual() == 'Identificador':
       self.f_lista_comandos()
-      if self.token_atual() == 'end':
+      # GAMBIARRA
+      # print(f"iiiiiiiii{self.token_atual()}")
+      if (self.token_atual() == 'end' and self.tokens[self.posicao -1].value == ';') or self.tokens[self.posicao -1].value == 'end':
         break # Se chegar o end do bloco, não tentará processar mais nada
-
+      else: 
+        self.mensagem_token("Esperava um delimitador ';' antes do end.")
+        escrever_erro_sintatico(self.tokens[self.posicao])
+        exit()
   def f_comando_composto(self):
     if self.token_atual() == 'begin':
       self.count_begin += 1
       self.consumir('Palavra reservada')
       self.f_comandos_opcionais()
-      if(self.token_atual()) == 'end' and self.tokens[self.posicao + 1].value == '.' and self.count_begin == 1:
+      if self.token_atual() == 'end' and self.tokens[self.posicao + 1].value == '.' and self.count_begin == 1:
         return "Programa finalizado com sucesso."
-      elif self.token_atual == 'end':
+      elif self.token_atual() == 'end':
         self.count_begin -= 1 # desempilha, pois encontrou o seu par
         self.consumir('Palavra reservada')
       else: 
@@ -501,9 +506,10 @@ class Sintatico:
     #   self.mensagem_token(f"Esperava a palavra reservada var, mas foi encontrado {self.token_atual()}")
     #   escrever_erro_sintatico(self.tokens[self.posicao])    
   
+  #????? entender pq que não tá funcionando
   def f_parte_else(self):
     if self.token_atual() == 'else':
-      self.consumir('Palavra reservada')
+      self.consumir(self.tipo_atual())
       self.f_comando()
 
 # -------------------------------------------------------- Main do Analisador Sintático
@@ -519,30 +525,38 @@ def ler_tokens(nome_do_arquivo):
 
 source_file1 = 'lexico1.csv'
 source_file2 = 'lexico2.csv'
-source_file3 = 'lexico3.csv'
+# source_file3 = 'lexico3.csv'
+source_file3 = 'lexico3A.csv'
 source_file4 = 'lexico4.csv'
 source_file5 = 'lexico5.csv'
 
 source_nada = 'lex_nada.csv'
+source_soma = 'lex_soma.csv'
 
 # output_file = 'sintatico.csv'  # Nome do arquivo de saída
 output_file1 = 'sintatico1.csv' 
 output_file2 = 'sintatico2.csv' 
-output_file3 = 'sintatico3.csv' 
+# output_file3 = 'sintatico3.csv'
+output_file3 = 'sintatico3A.csv' 
+ 
 output_file4 = 'sintatico4.csv' 
 output_file5 = 'sintatico5.csv' 
 
 output_nada = 'sint_nada.csv'
+output_soma = 'sint_soma.csv'
 
 # Escreve o arquivo de saída do analisador sintático
 def escrever_erro_sintatico(token):
   """Escreve o arquivo de saída do analisador sintático"""
   # Abre o arquivo de saída em modo de escrita
-  with open(output_nada, "a") as arquivo_saida:
+  with open(output_file1, "a") as arquivo_saida:
     # Escreve a mensagem de erro no arquivo
     arquivo_saida.write(f"Erro sintático na linha {token.line}: '{token.erro_sintatico}'\n")
+  print(colored("-----"*8,'red'))
+  print(colored("Erro sintático encontrado. Verifique o arquivo gerado.",'red'))
+  print(colored("-----"*8,'red'))
 
-tokens = ler_tokens(source_nada)
+tokens = ler_tokens(source_file1)
 
-analisador = Sintatico(tokens, output_file=output_nada, input_file=source_nada)
+analisador = Sintatico(tokens, output_file=output_file1, input_file=source_file1)
 analisador.analisar()
