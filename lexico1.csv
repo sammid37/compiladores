@@ -1,0 +1,35 @@
+Token,Classificação,Linha
+program,Palavra reservada,1
+Test1,Identificador,1
+;,Delimitador,1
+var,Palavra reservada,2
+Area,Identificador,3
+",",Delimitador,3
+Comprimento,Identificador,3
+",",Delimitador,3
+Raio,Identificador,3
+:,Delimitador,3
+real,Palavra reservada,3
+;,Delimitador,3
+begin,Palavra reservada,4
+Raio,Identificador,5
+:=,Atribuição,5
+4,Número inteiro,5
+;,Delimitador,5
+Area,Identificador,6
+:=,Atribuição,6
+3.14,Número real,6
+*,Operador multiplicativo,6
+Raio,Identificador,6
+*,Operador multiplicativo,6
+Raio,Identificador,6
+;,Delimitador,6
+Comprimento,Identificador,7
+:=,Atribuição,7
+2,Número inteiro,7
+*,Operador multiplicativo,7
+3.14,Número real,7
+*,Operador multiplicativo,7
+Raio,Identificador,7
+end,Palavra reservada,8
+.,Delimitador,8

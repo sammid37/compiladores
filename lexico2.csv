@@ -1,0 +1,44 @@
+Token,Classificação,Linha
+program,Palavra reservada,1
+Test2,Identificador,1
+;,Delimitador,1
+var,Palavra reservada,2
+X,Identificador,3
+",",Delimitador,3
+A,Identificador,3
+",",Delimitador,3
+B,Identificador,3
+:,Delimitador,3
+integer,Palavra reservada,3
+;,Delimitador,3
+begin,Palavra reservada,4
+A,Identificador,5
+:=,Atribuição,5
+5,Número inteiro,5
+;,Delimitador,5
+B,Identificador,6
+:=,Atribuição,6
+10,Número inteiro,6
+;,Delimitador,6
+if,Palavra reservada,7
+(,Delimitador,7
+A,Identificador,7
+>,Operador relacional,7
+B,Identificador,7
+),Delimitador,7
+then,Palavra reservada,7
+begin,Palavra reservada,8
+X,Identificador,9
+:=,Atribuição,9
+A,Identificador,9
+;,Delimitador,9
+A,Identificador,10
+:=,Atribuição,10
+B,Identificador,10
+;,Delimitador,10
+B,Identificador,11
+:=,Atribuição,11
+X,Identificador,11
+end,Palavra reservada,12
+end,Palavra reservada,13
+.,Delimitador,13

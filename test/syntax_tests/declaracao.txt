@@ -1,0 +1,16 @@
+program DeclaracaoVariaveis;
+
+var
+  {Variáveis inicializadas}
+  idade: Integer = 25;
+  altura: Real = 1.75;
+  temCarro: Boolean = True;
+
+  {Variáveis não inicializadas}
+  peso: Real;
+  quantidadeFilhos: Integer;
+  temGato: Boolean;
+
+begin
+  {O programa não faz nada além de declarar variáveis}
+end.
