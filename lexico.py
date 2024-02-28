@@ -143,7 +143,9 @@ source_file3 = 'test/syntax_tests/Test3.pas'
 source_file4 = 'test/syntax_tests/Test4.pas'
 source_file5 = 'test/syntax_tests/Test5.pas'
 
-with open(source_file5, 'r') as f: 
+source_nada = 'test/syntax_tests/nada.txt'
+
+with open(source_nada, 'r') as f: 
   source_code = f.read()
   # print(source_code)
 
@@ -162,7 +164,9 @@ output_file3 = 'lexico3.csv'
 output_file4 = 'lexico4.csv'
 output_file5 = 'lexico5.csv'
 
-with open(output_file5, 'a', newline='') as csvfile:
+output_nada = 'lex_nada.csv'
+
+with open(output_nada, 'a', newline='') as csvfile:
   fieldnames = ['Token', 'Classificação', 'Linha']
   writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 

@@ -523,6 +523,8 @@ source_file3 = 'lexico3.csv'
 source_file4 = 'lexico4.csv'
 source_file5 = 'lexico5.csv'
 
+source_nada = 'lex_nada.csv'
+
 # output_file = 'sintatico.csv'  # Nome do arquivo de saída
 output_file1 = 'sintatico1.csv' 
 output_file2 = 'sintatico2.csv' 
@@ -530,15 +532,17 @@ output_file3 = 'sintatico3.csv'
 output_file4 = 'sintatico4.csv' 
 output_file5 = 'sintatico5.csv' 
 
+output_nada = 'sint_nada.csv'
+
 # Escreve o arquivo de saída do analisador sintático
 def escrever_erro_sintatico(token):
   """Escreve o arquivo de saída do analisador sintático"""
   # Abre o arquivo de saída em modo de escrita
-  with open(output_file5, "a") as arquivo_saida:
+  with open(output_nada, "a") as arquivo_saida:
     # Escreve a mensagem de erro no arquivo
     arquivo_saida.write(f"Erro sintático na linha {token.line}: '{token.erro_sintatico}'\n")
 
-tokens = ler_tokens(source_file5)
+tokens = ler_tokens(source_nada)
 
-analisador = Sintatico(tokens, output_file=output_file5, input_file=source_file5)
+analisador = Sintatico(tokens, output_file=output_nada, input_file=source_nada)
 analisador.analisar()
