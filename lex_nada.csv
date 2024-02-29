@@ -1,7 +1,0 @@
-Token,Classificação,Linha
-program,Palavra reservada,1
-Nada,Identificador,1
-;,Delimitador,1
-begin,Palavra reservada,3
-end,Palavra reservada,5
-.,Delimitador,5

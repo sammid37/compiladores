@@ -1,7 +1,7 @@
 program SomaDeInteiros;
 
 var
-  numero1, numero2, soma: Integer;
+  numero1, numero2, soma: integer;
 
 begin
   {Atribui valores às variáveis}

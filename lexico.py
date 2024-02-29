@@ -131,21 +131,24 @@ class Lexer:
       self.position += 1    
 
       # Se não corresponder a nenhum padrão, gera um erro
+      print(f"{self.input_code[self.position-1]}")
       raise ValueError(f"Erro léxico: caractere inválido '{self.input_code[self.position]}' na linha {self.line_number}, posição {self.position}")
 
     # Retorna tokens classificados :)
     return self.tokens
 
 # Lendo arquivo de entrada
-source_file1 = 'test/syntax_tests/Test1.pas'
+# source_file1 = 'test/syntax_tests/Test1.pas'
+source_file1 = 'test/lexer_tests/exemplo1.txt'
 source_file2 = 'test/syntax_tests/Test2.pas'
 source_file3 = 'test/syntax_tests/Test3.pas'
 source_file4 = 'test/syntax_tests/Test4.pas'
 source_file5 = 'test/syntax_tests/Test5.pas'
 
+source_soma = 'test/syntax_tests/soma.txt'
 source_nada = 'test/syntax_tests/nada.txt'
 
-with open(source_nada, 'r') as f: 
+with open(source_file1, 'r') as f: 
   source_code = f.read()
   # print(source_code)
 
@@ -160,13 +163,15 @@ tokens = lexer.tokenize()
 # Gernado a saída em um arquivo .CSV
 output_file1 = 'lexico1.csv'
 output_file2 = 'lexico2.csv'
-output_file3 = 'lexico3.csv'
+# output_file3 = 'lexico3.csv'
+output_file3 = 'lexico3A.csv'
 output_file4 = 'lexico4.csv'
 output_file5 = 'lexico5.csv'
 
+output_soma = 'lex_soma.csv'
 output_nada = 'lex_nada.csv'
 
-with open(output_nada, 'a', newline='') as csvfile:
+with open(output_file1, 'w', newline='') as csvfile:
   fieldnames = ['Token', 'Classificação', 'Linha']
   writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
