@@ -158,7 +158,7 @@ class Sintatico:
       escrever_erro_sintatico(self.tokens[self.posicao])
       exit()
 
-  # ** Regras dependentes simples
+  #* <<REVISAR>> -> não-determinismo, p/ ID (lista_expressao) vira ID com Argumentos (GPT)
   def f_fator(self):
     if self.tipo_atual() == 'Identificador':
       self.f_ativacao_procedimento()
@@ -187,7 +187,7 @@ class Sintatico:
     #   self.mensagem_token(f"Esperava um fator, mas foi encontrado {self.token_atual()}")
     #   escrever_erro_sintatico(self.tokens[self.posicao])
     #   exit()
-
+  #* <<REVISAR>>
   def f_expressao_simples(self):
     if self.token_atual() in SINAL:
       self.consumir(self.tipo_atual())
@@ -202,22 +202,22 @@ class Sintatico:
       self.consumir(self.tipo_atual())
       self.f_termo()
       self.f_expressao_simples_linha()
-
+  #* <<REVISAR>> pq ela chama expressão simples em 2 casos
   def f_expressao(self):
     self.f_expressao_simples()  # Primeiro, analisa uma expressão simples
     self.f_expressao_linha()
-
+  #* <<REVISAR>>
   def f_expressao_linha(self):
     if self.token_atual() in OP_RELACIONAL:  # Se encontrar um operador relacional
       self.consumir(self.tipo_atual())  # Consome o operador relacional
       self.f_expressao_simples()  # Em seguida, analisa outra expressão simples
-
+  #* <<REVISAR>>
   def f_lista_de_expressao(self):
     self.f_expressao()  # Analisa a primeira expressão da lista
     while self.token_atual() == ',':
       self.consumir('Delimitador')  # Consome a vírgula
       self.f_expressao()  # Analisa a próxima expressão na lista
-
+  #* <<REVISAR>>
   def f_termo(self):
     self.f_fator()  # Analisa o primeiro fator do termo
     self.f_termo_linha()
@@ -227,7 +227,7 @@ class Sintatico:
       self.consumir('Operador multiplicativo')  # Consome o operador multiplicativo
       self.f_fator()  # Analisa o próximo fator no termo
       self.f_termo_linha()
-
+  #* <<REVISAR>> não-determinismo!! (vai tratar o problema do fator())
   def f_ativacao_procedimento(self):
     if self.tipo_atual() == 'Identificador':
       self.consumir('Identificador')  # Consome o identificador do procedimento
@@ -318,7 +318,7 @@ class Sintatico:
       # self.mensagem_token(f"Comando inválido. Recebido: {self.token_atual()} de tipo {self.tipo_atual()}")
       # escrever_erro_sintatico(self.tokens[self.posicao])
       # exit()
-
+  #? <<OK>>
   def f_lista_comandos(self): 
     self.f_comando()
     self.f_lista_comandos_linha()
@@ -372,7 +372,7 @@ class Sintatico:
         self.mensagem_token(f"Esperava um identificador, mas foi encontrado {self.token_atual()}")
         escrever_erro_sintatico(self.tokens[self.posicao])
         exit()
-
+  #? <<OK>>
   def f_lista_de_parametros(self):
     """Analisa uma lista de parâmetros na gramática."""
     self.f_lista_de_identificadores()  # Analisa a lista de identificadores
@@ -434,7 +434,7 @@ class Sintatico:
       self.mensagem_token(f"Esperava a palavra reservada 'procedure', mas foi encontrado {self.token_atual()}")
       escrever_erro_sintatico(self.tokens[self.posicao])
       exit()
-
+  #* <<REVISAR>>
   def f_declaracoes_de_subprogramas(self):
     """Analisa declarações de subprogramas na gramática."""
     if self.token_atual() == 'procedure':
@@ -446,7 +446,7 @@ class Sintatico:
         self.mensagem_token(f"Esperava o delimitador ';', mas foi encontrado {self.token_atual()}")
         escrever_erro_sintatico(self.tokens[self.posicao])
         exit()
-  
+  #?? <<OK>>  
   def f_lista_de_identificadores(self):
     """Analisa uma lista de identificadores na gramática."""
     if self.tipo_atual() == 'Identificador':
@@ -471,7 +471,7 @@ class Sintatico:
         exit()  # Encerra o programa em caso de erro grave
     # Caso não haja mais identificadores após a vírgula, a produção é epsilon (vazio)
     # Não é necessário fazer nada nesse caso, pois a lista pode terminar aqui
-        
+  #?? <<OK>>      
   def f_lista_declaracoes_variaveis(self):
     self.f_lista_de_identificadores()  # Analisa a lista de identificadores
     if self.token_atual() == ':':
@@ -524,26 +524,7 @@ def ler_tokens(nome_do_arquivo):
   return tokens
 
 source_file1 = 'lexico1.csv'
-source_file2 = 'lexico2.csv'
-# source_file3 = 'lexico3.csv'
-source_file3 = 'lexico3A.csv'
-source_file4 = 'lexico4.csv'
-source_file5 = 'lexico5.csv'
-
-source_nada = 'lex_nada.csv'
-source_soma = 'lex_soma.csv'
-
-# output_file = 'sintatico.csv'  # Nome do arquivo de saída
 output_file1 = 'sintatico1.csv' 
-output_file2 = 'sintatico2.csv' 
-# output_file3 = 'sintatico3.csv'
-output_file3 = 'sintatico3A.csv' 
- 
-output_file4 = 'sintatico4.csv' 
-output_file5 = 'sintatico5.csv' 
-
-output_nada = 'sint_nada.csv'
-output_soma = 'sint_soma.csv'
 
 # Escreve o arquivo de saída do analisador sintático
 def escrever_erro_sintatico(token):
