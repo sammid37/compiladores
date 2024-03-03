@@ -5,31 +5,27 @@
 import re
 import csv
 
+from tokens import Token
+
 from constantes import *
 from termcolor import colored
 
 # Definição de um Token: tipo, valor e linha onde se localiza
-class Token:
-  def __init__(self, token_type, value, line, erro_sintatico=None):
-    self.type = token_type
-    self.value = value
-    self.line = line
-    self.erro_sintatico = erro_sintatico
-
-  def __str__(self):
-    if(self.erro_sintatico): 
-      return f"({self.value}, {self.type}, linha {self.line}, erro sintático: '{self.erro_sintatico}')"
-    else:
-      return f"({self.value}, {self.type}, linha {self.line})"
        
 # Definição de um Analisador Sintático
 class Sintatico:
-  def __init__(self, tokens, output_file, input_file):
+  def __init__(self, tokens):
     self.tokens = tokens # a lista de tokens (formado por uma tupla << type, value, line >>)
     self.posicao = 0 # posição do token na lista de tuplas
     self.count_begin = 0 # indicador para pares begin e end
+    self.input_file = None
+    self.output_syntax = None
+
+  def set_input_file(self, input_file):
     self.input_file = input_file
-    self.output_file = output_file
+
+  def set_output_syntax(self, output_syntax):
+    self.output_syntax = output_syntax
 
   def token_atual(self):
     """Obtém o valor do token atual"""
@@ -67,9 +63,7 @@ class Sintatico:
   def analisar(self):
     """Realiza a análise sintática de um programa"""
     self.programa()
-    print(colored("-----"*8,'green'))
-    print(colored("Análise sintática concluída com sucesso.", 'green'))
-    print(colored("-----"*8,'green'))
+    print(colored("✅ Análise sintática concluída com sucesso.", 'green'))
 
   def programa(self):
     """Contém regras (subregras) de um programa em Pascal"""
@@ -77,6 +71,8 @@ class Sintatico:
     self.f_program()
     self.f_id() 
     self.f_delimiter_program()
+
+    # print("TESTE")
     # Verificação de declarações de variaveis, declarações de subprograma e comandos compostos
     self.f_declaracoes_variaveis()
     self.f_declaracoes_de_subprogramas() 
@@ -89,7 +85,7 @@ class Sintatico:
       self.consumir('Palavra reservada')
     else: 
       self.mensagem_token(f"Esperava a palavra reservada 'program', mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
       exit()
 
   def f_id(self): 
@@ -97,7 +93,7 @@ class Sintatico:
       self.consumir(self.tipo_atual())
     else: 
       self.mensagem_token(f"Esperava um identificador, mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
       exit()
 
   def f_delimiter_program(self): 
@@ -106,7 +102,7 @@ class Sintatico:
       self.consumir(self.tipo_atual())
     else:
       self.mensagem_token(f"Esperava o delimitador ';', mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
       exit()
 
   def f_delimiter(self): 
@@ -114,7 +110,7 @@ class Sintatico:
       self.consumir(self.tipo_atual())
     else:
       self.mensagem_token(f"Esperava algum delimitado, mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
       exit()
 
   # * Regras não dependentes
@@ -123,7 +119,7 @@ class Sintatico:
       self.consumir(self.tipo_atual())
     else:
       self.mensagem_token(f"Esperava algum operador aditivo, mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
       exit()
 
   def f_op_multiplicativo(self):  
@@ -131,7 +127,7 @@ class Sintatico:
       self.consumir(self.tipo_atual())
     else:
       self.mensagem_token(f"Esperava algum operador multiplicativo, mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
       exit()
 
   def f_op_relacional(self):
@@ -139,7 +135,7 @@ class Sintatico:
       self.consumir(self.tipo_atual())
     else:
       self.mensagem_token(f"Esperava algum operador relacional, mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
       exit()
 
   def f_sinal(self):
@@ -147,7 +143,7 @@ class Sintatico:
       self.consumir(self.tipo_atual())
     else:
       self.mensagem_token(f"Esperava algum sinal, mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
       exit()
     
   def f_tipo(self):
@@ -155,10 +151,10 @@ class Sintatico:
       self.consumir(self.tipo_atual())
     else:
       self.mensagem_token(f"Esperava algum tipo tipo de variável, mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
       exit()
 
-  # ** Regras dependentes simples
+  #* <<REVISAR>> -> não-determinismo, p/ ID (lista_expressao) vira ID com Argumentos (GPT)
   def f_fator(self):
     if self.tipo_atual() == 'Identificador':
       self.f_ativacao_procedimento()
@@ -171,7 +167,7 @@ class Sintatico:
       self.f_expressao()  # Chamada para analisar uma expressão
       if self.token_atual() != ')':
         self.mensagem_token(f"Esperava o delimitador ')', mas foi encontrado {self.token_atual()}")
-        escrever_erro_sintatico(self.tokens[self.posicao])
+        self.escrever_erro_sintatico(self.tokens[self.posicao])
         exit()
       else:
         if self.tipo_atual() == 'Delimitador':
@@ -187,7 +183,7 @@ class Sintatico:
     #   self.mensagem_token(f"Esperava um fator, mas foi encontrado {self.token_atual()}")
     #   escrever_erro_sintatico(self.tokens[self.posicao])
     #   exit()
-
+  #* <<REVISAR>>
   def f_expressao_simples(self):
     if self.token_atual() in SINAL:
       self.consumir(self.tipo_atual())
@@ -202,22 +198,22 @@ class Sintatico:
       self.consumir(self.tipo_atual())
       self.f_termo()
       self.f_expressao_simples_linha()
-
+  #* <<REVISAR>> pq ela chama expressão simples em 2 casos
   def f_expressao(self):
     self.f_expressao_simples()  # Primeiro, analisa uma expressão simples
     self.f_expressao_linha()
-
+  #* <<REVISAR>>
   def f_expressao_linha(self):
     if self.token_atual() in OP_RELACIONAL:  # Se encontrar um operador relacional
       self.consumir(self.tipo_atual())  # Consome o operador relacional
       self.f_expressao_simples()  # Em seguida, analisa outra expressão simples
-
+  #* <<REVISAR>>
   def f_lista_de_expressao(self):
     self.f_expressao()  # Analisa a primeira expressão da lista
     while self.token_atual() == ',':
       self.consumir('Delimitador')  # Consome a vírgula
       self.f_expressao()  # Analisa a próxima expressão na lista
-
+  #* <<REVISAR>>
   def f_termo(self):
     self.f_fator()  # Analisa o primeiro fator do termo
     self.f_termo_linha()
@@ -227,7 +223,7 @@ class Sintatico:
       self.consumir('Operador multiplicativo')  # Consome o operador multiplicativo
       self.f_fator()  # Analisa o próximo fator no termo
       self.f_termo_linha()
-
+  #* <<REVISAR>> não-determinismo!! (vai tratar o problema do fator())
   def f_ativacao_procedimento(self):
     if self.tipo_atual() == 'Identificador':
       self.consumir('Identificador')  # Consome o identificador do procedimento
@@ -238,7 +234,7 @@ class Sintatico:
           self.consumir('Delimitador')  # Consome o ')'
         else:
           self.mensagem_token(f"Esperava o delimitador ')', mas foi encontrado {self.token_atual()}")
-          escrever_erro_sintatico(self.tokens[self.posicao])
+          self.escrever_erro_sintatico(self.tokens[self.posicao])
           exit()
       else:
         self.f_expressao_simples()
@@ -247,7 +243,7 @@ class Sintatico:
         # exit()
     else:
       self.mensagem_token(f"Esperava um identificador, mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
       exit()
 
   # def f_ativacao_procedimento_linha():
@@ -275,7 +271,7 @@ class Sintatico:
         self.f_parte_else()
       else:
         self.mensagem_token(f"Esperava um a palavra reservada then, mas foi encontrado {self.token_atual()}")
-        escrever_erro_sintatico(self.tokens[self.posicao])
+        self.escrever_erro_sintatico(self.tokens[self.posicao])
         exit()
     elif self.token_atual() == 'while':
       self.consumir('Palavra reservada')
@@ -285,7 +281,7 @@ class Sintatico:
         self.f_comando_composto()
       else: 
         self.mensagem_token(f"Esperava um a palavra reservada do, mas foi encontrado {self.token_atual()}")
-        escrever_erro_sintatico(self.tokens[self.posicao])
+        self.escrever_erro_sintatico(self.tokens[self.posicao])
         exit()
     # Caso extra não informado pelo professor, mas implementado
     elif self.token_atual() == 'for':
@@ -302,15 +298,15 @@ class Sintatico:
             self.f_comando_composto()
           else:
             self.mensagem_token(f"Esperava um a palavra reservada do, mas foi encontrado {self.token_atual()}")
-            escrever_erro_sintatico(self.tokens[self.posicao])
+            self.escrever_erro_sintatico(self.tokens[self.posicao])
             exit()
         else:
           self.mensagem_token(f"Esperava um a palavra reservada to, mas foi encontrado {self.token_atual()}")
-          escrever_erro_sintatico(self.tokens[self.posicao])
+          self.escrever_erro_sintatico(self.tokens[self.posicao])
           exit()
       else:
         self.mensagem_token(f"Esperava símbolo de atribuição :=, mas foi encontrado {self.token_atual()}")
-        escrever_erro_sintatico(self.tokens[self.posicao])
+        self.escrever_erro_sintatico(self.tokens[self.posicao])
         exit()
     else:
       if self.token_atual() == 'end' and self.tokens[self.posicao + 1].value == '.':
@@ -318,7 +314,7 @@ class Sintatico:
       # self.mensagem_token(f"Comando inválido. Recebido: {self.token_atual()} de tipo {self.tipo_atual()}")
       # escrever_erro_sintatico(self.tokens[self.posicao])
       # exit()
-
+  #? <<OK>>
   def f_lista_comandos(self): 
     self.f_comando()
     self.f_lista_comandos_linha()
@@ -339,7 +335,7 @@ class Sintatico:
         break # Se chegar o end do bloco, não tentará processar mais nada
       else: 
         self.mensagem_token("Esperava um delimitador ';' antes do end.")
-        escrever_erro_sintatico(self.tokens[self.posicao])
+        self.escrever_erro_sintatico(self.tokens[self.posicao])
         exit()
   def f_comando_composto(self):
     if self.token_atual() == 'begin':
@@ -357,22 +353,22 @@ class Sintatico:
           return "Programa finalizado com sucesso."
         else:
           self.mensagem_token(f"Esperava a palavra reservada end, mas foi encontrado {self.token_atual()}")
-          escrever_erro_sintatico(self.tokens[self.posicao])
+          self.escrever_erro_sintatico(self.tokens[self.posicao])
           exit()
     else: 
       self.mensagem_token(f"Esperava a palavra reservada begin, mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
       exit()
 
   def f_variavel(self):
     """Analisa uma variável na gramática."""
     if self.tipo_atual() == 'Identificador':
-        self.consumir('Identificador')  # Consome o token correspondente a um identificador
+      self.consumir('Identificador')  # Consome o token correspondente a um identificador
     else:
-        self.mensagem_token(f"Esperava um identificador, mas foi encontrado {self.token_atual()}")
-        escrever_erro_sintatico(self.tokens[self.posicao])
-        exit()
-
+      self.mensagem_token(f"Esperava um identificador, mas foi encontrado {self.token_atual()}")
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
+      exit()
+  #? <<OK>>
   def f_lista_de_parametros(self):
     """Analisa uma lista de parâmetros na gramática."""
     self.f_lista_de_identificadores()  # Analisa a lista de identificadores
@@ -382,7 +378,7 @@ class Sintatico:
       self.f_lista_de_parametros_linha()  # Chama o método para analisar a próxima linha de parâmetros
     else: 
       self.mensagem_token(f"Esperava um delimitador ':', mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
 
   def f_lista_de_parametros_linha(self):
     """Analisa uma linha de parâmetros na gramática."""
@@ -402,7 +398,7 @@ class Sintatico:
         self.f_lista_de_parametros_linha() # chamada recursiva
     else:
       self.mensagem_token(f"Esperava um delimitador ';', mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
 
   def f_argumentos(self):
     """Analisa os argumentos na gramática."""
@@ -413,7 +409,7 @@ class Sintatico:
         self.consumir('Delimitador')  # Consome o ')'
       else:
         self.mensagem_token(f"Esperava um delimitador ')', mas foi encontrado {self.token_atual()}")
-        escrever_erro_sintatico(self.tokens[self.posicao])
+        self.escrever_erro_sintatico(self.tokens[self.posicao])
 
   def f_declaracao_de_subprograma(self):
     """Analisa uma declaração de subprograma na gramática."""
@@ -428,13 +424,13 @@ class Sintatico:
         self.f_comando_composto()
       else:
         self.mensagem_token(f"Esperava o delimitador ';', mas foi encontrado {self.token_atual()}")
-        escrever_erro_sintatico(self.tokens[self.posicao])
+        self.escrever_erro_sintatico(self.tokens[self.posicao])
         exit()
     else:
       self.mensagem_token(f"Esperava a palavra reservada 'procedure', mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
       exit()
-
+  #* <<REVISAR>>
   def f_declaracoes_de_subprogramas(self):
     """Analisa declarações de subprogramas na gramática."""
     if self.token_atual() == 'procedure':
@@ -444,18 +440,18 @@ class Sintatico:
         self.f_declaracoes_de_subprogramas()
       else: 
         self.mensagem_token(f"Esperava o delimitador ';', mas foi encontrado {self.token_atual()}")
-        escrever_erro_sintatico(self.tokens[self.posicao])
+        self.escrever_erro_sintatico(self.tokens[self.posicao])
         exit()
-  
+  #?? <<OK>>  
   def f_lista_de_identificadores(self):
     """Analisa uma lista de identificadores na gramática."""
     if self.tipo_atual() == 'Identificador':
-        self.consumir('Identificador')  # Consome o primeiro identificador
-        self.f_lista_de_identificadores_linha()  # Chama o método para analisar o restante da lista de identificadores
+      self.consumir('Identificador')  # Consome o primeiro identificador
+      self.f_lista_de_identificadores_linha()  # Chama o método para analisar o restante da lista de identificadores
     else:
-        self.mensagem_token(f"Esperava um identificador, mas foi encontrado {self.token_atual()}")
-        escrever_erro_sintatico(self.tokens[self.posicao])
-        exit() 
+      self.mensagem_token(f"Esperava um identificador, mas foi encontrado {self.token_atual()}")
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
+      exit() 
 
   def f_lista_de_identificadores_linha(self):
     """Analisa o restante da lista de identificadores na gramática."""
@@ -467,11 +463,11 @@ class Sintatico:
         self.f_lista_de_identificadores_linha()  # Chama recursivamente o método para analisar mais identificadores
       else:
         self.mensagem_token(f"Esperava um identificador após a vírgula, mas foi encontrado {self.token_atual()}")
-        escrever_erro_sintatico(self.tokens[self.posicao])
+        self.escrever_erro_sintatico(self.tokens[self.posicao])
         exit()  # Encerra o programa em caso de erro grave
     # Caso não haja mais identificadores após a vírgula, a produção é epsilon (vazio)
     # Não é necessário fazer nada nesse caso, pois a lista pode terminar aqui
-        
+  #?? <<OK>>      
   def f_lista_declaracoes_variaveis(self):
     self.f_lista_de_identificadores()  # Analisa a lista de identificadores
     if self.token_atual() == ':':
@@ -489,7 +485,7 @@ class Sintatico:
         self.f_lista_declaracoes_variaveis_linha()  # Chama o método recursivamente para analisar a próxima linha de declarações de variáveis
     else:
       self.mensagem_token(f"Esperava um delimitador ';', mas foi encontrado {self.token_atual()}")
-      escrever_erro_sintatico(self.tokens[self.posicao])
+      self.escrever_erro_sintatico(self.tokens[self.posicao])
 
   def f_declaracoes_variaveis(self):
     """Verifica se há declarações de variáveis, consome a palavra reservada 'var' e verifica a lista de identificadores"""
@@ -512,51 +508,12 @@ class Sintatico:
       self.consumir(self.tipo_atual())
       self.f_comando()
 
-# -------------------------------------------------------- Main do Analisador Sintático
-# Lendo arquivo de entrada
-def ler_tokens(nome_do_arquivo):
-  tokens = []
-  with open(nome_do_arquivo, 'r') as csvfile:
-    leitor = csv.DictReader(csvfile)
-    for linha in leitor:
-      # criando uma tupla com o próprio token, o seu tipo e a linha que se encontra
-      tokens.append(Token(linha['Classificação'], linha['Token'], int(linha['Linha'])))
-  return tokens
-
-source_file1 = 'lexico1.csv'
-source_file2 = 'lexico2.csv'
-# source_file3 = 'lexico3.csv'
-source_file3 = 'lexico3A.csv'
-source_file4 = 'lexico4.csv'
-source_file5 = 'lexico5.csv'
-
-source_nada = 'lex_nada.csv'
-source_soma = 'lex_soma.csv'
-
-# output_file = 'sintatico.csv'  # Nome do arquivo de saída
-output_file1 = 'sintatico1.csv' 
-output_file2 = 'sintatico2.csv' 
-# output_file3 = 'sintatico3.csv'
-output_file3 = 'sintatico3A.csv' 
- 
-output_file4 = 'sintatico4.csv' 
-output_file5 = 'sintatico5.csv' 
-
-output_nada = 'sint_nada.csv'
-output_soma = 'sint_soma.csv'
 
 # Escreve o arquivo de saída do analisador sintático
-def escrever_erro_sintatico(token):
-  """Escreve o arquivo de saída do analisador sintático"""
-  # Abre o arquivo de saída em modo de escrita
-  with open(output_file1, "a") as arquivo_saida:
-    # Escreve a mensagem de erro no arquivo
-    arquivo_saida.write(f"Erro sintático na linha {token.line}: '{token.erro_sintatico}'\n")
-  print(colored("-----"*8,'red'))
-  print(colored("Erro sintático encontrado. Verifique o arquivo gerado.",'red'))
-  print(colored("-----"*8,'red'))
-
-tokens = ler_tokens(source_file1)
-
-analisador = Sintatico(tokens, output_file=output_file1, input_file=source_file1)
-analisador.analisar()
+  def escrever_erro_sintatico(self, token):
+    """Escreve o arquivo de saída do analisador sintático"""
+    # Abre o arquivo de saída em modo de escrita
+    with open(self.output_syntax, "a") as arquivo_saida:
+      # Escreve a mensagem de erro no arquivo
+      arquivo_saida.write(f"Erro sintático na linha {token.line}: '{token.erro_sintatico}'\n")
+    print(colored("🟥 Erro sintático encontrado. Verifique o arquivo gerado.",'red'))
