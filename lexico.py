@@ -79,13 +79,12 @@ class Lexer:
           self.tokens.append(Token(token_type, value, self.line_number))
           self.position += len(value)
           continue
-        
+
+        # Verifica se é número real ou inteiro
         if re.match(r'\d', self.source_code[self.position]):
-          # É número...
           number_match = re.match(r'-?\d*\.?\d+(?:[eE][-+]?\d+)?', self.source_code[self.position:])
           if number_match:
             value = number_match.group()
-            # Verificar se é um número inteiro ou real
             if '.' in value or 'e' in value.lower():
               token_type = 'Número real'
             else:

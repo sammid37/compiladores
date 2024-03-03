@@ -8,5 +8,7 @@ begin
 
   { Realiza operações aritméticas e relacionais }
   if (x + y > 15) then
+    writeln('A soma é maior que 15')
   else
+    writeln('A soma é menor ou igual a 15');
 end.
