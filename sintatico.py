@@ -5,31 +5,27 @@
 import re
 import csv
 
+from tokens import Token
+
 from constantes import *
 from termcolor import colored
 
 # Definição de um Token: tipo, valor e linha onde se localiza
-class Token:
-  def __init__(self, token_type, value, line, erro_sintatico=None):
-    self.type = token_type
-    self.value = value
-    self.line = line
-    self.erro_sintatico = erro_sintatico
-
-  def __str__(self):
-    if(self.erro_sintatico): 
-      return f"({self.value}, {self.type}, linha {self.line}, erro sintático: '{self.erro_sintatico}')"
-    else:
-      return f"({self.value}, {self.type}, linha {self.line})"
        
 # Definição de um Analisador Sintático
 class Sintatico:
-  def __init__(self, tokens, output_file, input_file):
+  def __init__(self, tokens):
     self.tokens = tokens # a lista de tokens (formado por uma tupla << type, value, line >>)
     self.posicao = 0 # posição do token na lista de tuplas
     self.count_begin = 0 # indicador para pares begin e end
+    self.input_file = None
+    self.output_syntax = None
+
+  def set_input_file(self, input_file):
     self.input_file = input_file
-    self.output_file = output_file
+
+  def set_output_syntax(self, output_syntax):
+    self.output_syntax = output_syntax
 
   def token_atual(self):
     """Obtém o valor do token atual"""
@@ -73,6 +69,7 @@ class Sintatico:
 
   def programa(self):
     """Contém regras (subregras) de um programa em Pascal"""
+    print("teste")
     # Inicial: verificar se o arquivo começa com: << program id ; >>
     self.f_program()
     self.f_id() 
@@ -512,32 +509,16 @@ class Sintatico:
       self.consumir(self.tipo_atual())
       self.f_comando()
 
-# -------------------------------------------------------- Main do Analisador Sintático
-# Lendo arquivo de entrada
-def ler_tokens(nome_do_arquivo):
-  tokens = []
-  with open(nome_do_arquivo, 'r') as csvfile:
-    leitor = csv.DictReader(csvfile)
-    for linha in leitor:
-      # criando uma tupla com o próprio token, o seu tipo e a linha que se encontra
-      tokens.append(Token(linha['Classificação'], linha['Token'], int(linha['Linha'])))
-  return tokens
-
-source_file1 = 'lexico1.csv'
-output_file1 = 'sintatico1.csv' 
 
 # Escreve o arquivo de saída do analisador sintático
 def escrever_erro_sintatico(token):
-  """Escreve o arquivo de saída do analisador sintático"""
-  # Abre o arquivo de saída em modo de escrita
-  with open(output_file1, "a") as arquivo_saida:
-    # Escreve a mensagem de erro no arquivo
-    arquivo_saida.write(f"Erro sintático na linha {token.line}: '{token.erro_sintatico}'\n")
-  print(colored("-----"*8,'red'))
-  print(colored("Erro sintático encontrado. Verifique o arquivo gerado.",'red'))
-  print(colored("-----"*8,'red'))
+  pass
+  # """Escreve o arquivo de saída do analisador sintático"""
+  # # Abre o arquivo de saída em modo de escrita
+  # with open(output_file1, "a") as arquivo_saida:
+  #   # Escreve a mensagem de erro no arquivo
+  #   arquivo_saida.write(f"Erro sintático na linha {token.line}: '{token.erro_sintatico}'\n")
+  # print(colored("-----"*8,'red'))
+  # print(colored("Erro sintático encontrado. Verifique o arquivo gerado.",'red'))
+  # print(colored("-----"*8,'red'))
 
-tokens = ler_tokens(source_file1)
-
-analisador = Sintatico(tokens, output_file=output_file1, input_file=source_file1)
-analisador.analisar()

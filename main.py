@@ -2,45 +2,83 @@
 # Compilador, arquivo principal
 # Enthony e Samantha
 
+import csv
+import time
+
+from tqdm import tqdm
+from termcolor import colored
+
+from tokens import Token
 from lexico import Lexer
 from sintatico import Sintatico
 
-# TODO: criar classe Token separadamente e importar ou definí-la no arquivo main.py
-# TODO: [Lexico] acrescentar aceitação de aspas simples e duplas 
-
-from termcolor import colored
-
 def main():
+
   # Defina o nome do arquivo de entrada
   # Ex.: 'test/syntax_tests/Test1.pas'
-  source_code = "input_code.txt"
-  
+  source_code = "test/lexer_tests/exemplo1.txt"
+  with open(source_code, 'r') as f: 
+    source_code = f.read()
+  # print(source_code)
+
   # Defina o nome do arquivo de saída para o analisador léxico
   # Ex.: 'outputs/lexer_o/result1.csv'
   lexico_file = "lex_output.csv"
-  
+
   # Defina o nome do arquivo de saída para o analisador sintático
   # Ex.: 'outputs/syntax_o/result1.csv'
   sintatico_file = "sint_output.csv"
 
   # Realize a análise léxica a partir de um código fonte
-  # TODO: modificar a classe de forma que ele tbm receba um atributo arquivo de saída (semelhante ao que o sintático faz, pois o sintático receber 2 arquivos: entrada e saída)
-  lexer = Lexer(source_code)
-  tokens = lexer.tokenize() # armazena os tokens, talvez renomear apaenas para << t >>
+  print("Inicializando análise léxica...")
+  lexer = Lexer()
+  lexer.set_source_code(source_code=source_code)
+  lexer.set_output_lexer(output_lexer=lexico_file)
+  lexer.tokenize()
+  # total_tokens = len(lexer.tokens)
+  # print(len(source_code))
+  # print(total_tokens)
 
-  # TODO: seguir o padrão que está no analisador léxico
-  # Escreva os resultados da análise léxica no arquivo de saída
-  with open(lexico_file, "w") as f:
-    for token in tokens:
-      f.write(f"{token}\n")
+  with open(lexer.output_lexer, 'a', newline='') as csvfile:
+    fieldnames = ['Token', 'Classificação', 'Linha']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-  # TODO: Realizar alguma verificação de que o arquivo de saída do Léxico foi gerado para então o Sintático começar a operar.
+    writer.writeheader()  # Escreva o cabeçalho do CSV
+    for token in lexer.tokens:
+      writer.writerow({'Token': token.value, 'Classificação': token.type, 'Linha': token.line})
+    # with tqdm(total=total_tokens, desc="Escrevendo no arquivo CSV") as pbar:
 
-  # TODO: Verificar se precisa de ajustes
-  # -[] Armazenar tokens em tuplas (criar variável nova) -> semelhante ao que é feito em ler_tokens(nome_arq=<saida_CSV_lexico>) do Analisador SIntático
-  # Realize a análise sintática    
-  sintatico = Sintatico(tokens, sintatico_file, lexico_file)
+    #     # Escreva cada token no arquivo CSV
+    #     time.sleep(0.05)
+    #     pbar.update(1)  # Atualize a barra de progresso
+      
+  # TODO: incluir barra de progresso com tqdm
+  print("[Léxico] Arquivo .csv gerado!")
+
+
+  print("Inicializando análise sintática...")
+  lista_tokens = []
+  with open(lexico_file, 'r') as csvfile:
+    leitor = csv.DictReader(csvfile)
+    for linha in leitor:
+      # criando uma tupla com o próprio token, o seu tipo e a linha que se encontra
+      lista_tokens.append(Token(linha['Classificação'], linha['Token'], int(linha['Linha'])))
+
+# try:
+# except Exception as e:
+#   print(colored(f"Erro ocorrido durante a análise léxica: {e}", "red"))
+#   tqdm.close()
+
+  # Inicializando análise sintática
+  # Armazena tokens em tuplas
+
+  sintatico = Sintatico(lista_tokens)
+  sintatico.set_input_file(lexico_file)
+  sintatico.set_output_syntax(sintatico_file)
   sintatico.analisar()
+  print(lista_tokens)
 
-  print("Análise léxica e sintática concluídas.")
-  print(colored("Hello world","cyan"))
+if __name__ == "__main__":
+  print(colored("* * * Projeto de Compiladores", "cyan"))
+  print()
+  main()
