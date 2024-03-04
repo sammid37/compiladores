@@ -1,5 +1,5 @@
 program Nada;
 
 begin
-  {Este programa não faz nada}
+  {Este programa não faz nada
 end.

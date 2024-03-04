@@ -6,8 +6,8 @@ begin
    begin
       A := A * A;
       B := B * A;
-      R := A + B
-   end
+      R := A + B;
+   end;
 end.
 
 {utilizar mais de um for - encadeado}

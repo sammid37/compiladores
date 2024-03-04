@@ -16,12 +16,16 @@ class Lexer:
     self.tokens = []
     self.position = 0
     self.line_number = 1
+    self.lexer_errors = 0
 
   def set_source_code(self, source_code):
     self.source_code = source_code
 
   def set_output_lexer(self, output_lexer):
     self.output_lexer = output_lexer
+
+  def set_lexer_errors(self):
+    self.lexer_errors += 1
 
   def tokenize(self):
     # Listas de elementos aceitos
@@ -30,7 +34,7 @@ class Lexer:
     op_a = ['+', '-', 'or']
     op_m = ['*', '/', 'and']
     delimiter = [';', '.', ':', '(', ')', ',']
-    rw = ['program', 'var', 'integer', 'real', 'boolean', 'procedure', 'begin','end', 'if', 'then', 'else', 'while', 'do', 'not']
+    rw = ['program', 'var', 'integer', 'real', 'boolean', 'procedure', 'begin','end', 'if', 'then', 'else', 'while', 'do', 'not', 'for', 'to']
     
     # Enquanto não chega ao fim do arquivo 
     try:
@@ -49,7 +53,7 @@ class Lexer:
           
           # Se não encontrar o caractere de fechamento, isso indica um erro de comentário não fechado
           if closing_brace_index == -1:
-            raise Exception("Erro léxico: Comentário não fechado.")
+            raise Exception(f"Erro léxico: Comentário não fechado. Último caracter lido: '{self.source_code[self.position]}'.")
     
           # Contagem de linhas dentro do comentário
           comment_content = self.source_code[self.position+1:closing_brace_index] # fatiamento
@@ -136,6 +140,7 @@ class Lexer:
         raise Exception(f"Erro léxico: caractere inválido '{self.source_code[self.position]}' na linha {self.line_number}, posição {self.position}")
 
     except Exception as e:
+      self.lexer_errors +=1
       print(colored(e,"red"))
     # Retorna tokens classificados :)
     return self.tokens
