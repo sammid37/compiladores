@@ -5,7 +5,6 @@
 import csv
 import time
 
-from tqdm import tqdm
 from termcolor import colored
 
 from tokens import Token
@@ -28,7 +27,7 @@ def main():
   open(lexer_file, 'w').close()
   open(syntax_file, 'w').close()
 
-  # Realize a análise léxica a partir de um código fonte
+  # Realiza a análise léxica a partir de um código fonte
   print("⌛ Inicializando análise léxica...")
   lexer = Lexer()
   lexer.set_source_code(source_code=source_code)
@@ -42,15 +41,14 @@ def main():
     writer.writeheader()  # Escreva o cabeçalho do CSV
     for token in lexer.tokens:
       writer.writerow({'Token': token.value, 'Classificação': token.type, 'Linha': token.line})
-      
-  # TODO: incluir barra de progresso com tqdm (?)
+
   if lexer.lexer_errors != 0:
     print(colored(f"Análise léxica finalizada com {lexer.lexer_errors} erros.","red"))
   else:
     print(colored("✅ Análise léxica concluída com sucesso.","green"))
 
+  # Realiza a análise sintática a partir da saída do analisador léxico
   print("\n⌛ Inicializando análise sintática...")
-
   if (lexer.lexer_errors == 0):
     lista_tokens = []
     with open(lexer_file, 'r') as csvfile:
@@ -71,7 +69,8 @@ def main():
     print(f"\nNão foi possível realizar a análise sintática e semântica, pois erros foram encontrados durante a análise léxica.")
     print("Encerrando.")
 
+  # Em breve: realização da análise semântica -> projeto final
+
 if __name__ == "__main__":
-  print(colored("* * * Projeto de Compiladores", "cyan"))
-  print()
+  print(colored("* * * Projeto de Compiladores\n", "cyan"))
   main()
