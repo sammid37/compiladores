@@ -394,9 +394,9 @@ class Sintatico:
     else:
       print(colored(f"Esperava um delimitador ';', mas foi encontrado {self.token_atual()}","red"))
       exit()
-      
+
+  # TODO: correções em declarações de variáveis, de forma que f_tipo() retorne uma string correspondente ao tipo da variável declarada (e que possivelmente será utilizada em outras partes da análise sintática e semântica)
   def f_declaracoes_variaveis(self):
-    """Verifica se há declarações de variáveis, consome a palavra reservada 'var' e verifica a lista de identificadores"""
     if self.token_atual() == 'var':
       self.consumir('Palavra reservada')
       self.f_lista_de_identificadores()

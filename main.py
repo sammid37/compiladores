@@ -19,13 +19,9 @@ def main():
     source_code = f.read()
   # print(source_code)
 
-  # Defina o nome do arquivo de saída para o analisador léxico e sintático
+  # Defina o nome do arquivo de saída para o analisador léxico
   lexer_file = "lex_output.csv"        # Ex.: 'outputs/lexer_o/result1.csv'
-  syntax_file = "sint_output.csv"      # Ex.: 'outputs/syntax_o/result1.csv'
-
-  # Limpa o conteúdo dos arquivos, se existirem
-  open(lexer_file, 'w').close()
-  open(syntax_file, 'w').close()
+  open(lexer_file, 'w').close() # Limpa o conteúdo dos arquivos, se existirem
 
   # Realiza a análise léxica a partir de um código fonte
   print("⌛ Inicializando análise léxica...")
@@ -63,8 +59,6 @@ def main():
   else:
     print(f"\nNão foi possível realizar a análise sintática e semântica, pois erros foram encontrados durante a análise léxica.")
     print("Encerrando.")
-
-  # Em breve: realização da análise semântica -> projeto final
 
 if __name__ == "__main__":
   print(colored("* * * Projeto de Compiladores\n", "cyan"))
