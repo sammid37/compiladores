@@ -13,7 +13,7 @@ from sintatico import Sintatico
 
 def main():
   # Defina o nome do arquivo de entrada (código fonte)
-  source_code = "test/syntax_tests/Test1.pas"  # Ex.: 'test/syntax_tests/Test1.pas'
+  source_code = "test/syntax_tests/Test3.pas"  # Ex.: 'test/syntax_tests/Test1.pas'
   print(f"📃 Analisando o arquivo: {colored(source_code, 'cyan', 'on_cyan')}\n")
   with open(source_code, 'r') as f: 
     source_code = f.read()
@@ -48,7 +48,7 @@ def main():
     print(colored("✅ Análise léxica concluída com sucesso.","green"))
 
   # Realiza a análise sintática a partir da saída do analisador léxico
-  print("\n⌛ Inicializando análise sintática...")
+  print("\n⌛ Inicializando análise sintática e semântica...")
   if (lexer.lexer_errors == 0):
     lista_tokens = []
     with open(lexer_file, 'r') as csvfile:
@@ -58,12 +58,7 @@ def main():
         lista_tokens.append(Token(linha['Classificação'], linha['Token'], int(linha['Linha'])))
 
     sintatico = Sintatico(lista_tokens)
-    sintatico.set_input_file(lexer_file)
-    sintatico.set_output_syntax(syntax_file)
     sintatico.analisar()
-
-    print("\n⌛ Inicializando análise semântica...")
-    print("Em breve!")
 
   else:
     print(f"\nNão foi possível realizar a análise sintática e semântica, pois erros foram encontrados durante a análise léxica.")
