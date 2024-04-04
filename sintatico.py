@@ -94,13 +94,16 @@ class Sintatico:
     else:
       print(colored(f"Esperava algum sinal, mas foi encontrado {self.token_atual()}","red"))
       exit()
-    
+  #(MODIFICADA POR ENTHONY) 
   def f_tipo(self):
+    """Analisa o tipo de variável na gramática e retorna uma string correspondente."""
     if self.token_atual() in TIPO:
-      self.consumir(self.tipo_atual())
+        tipo_variavel = self.token_atual()  # Salva o tipo atual
+        self.consumir(self.tipo_atual())  # Consome o tipo
+        return tipo_variavel  # Retorna o tipo como string
     else:
-      print(colored(f"Esperava algum tipo tipo de variável, mas foi encontrado {self.token_atual()}","red"))
-      exit()
+        print(colored(f"Esperava algum tipo de variável, mas foi encontrado {self.token_atual()}","red"))
+        exit()
 
   def f_fator(self):
     if self.tipo_atual() == 'Identificador':
@@ -394,18 +397,19 @@ class Sintatico:
     else:
       print(colored(f"Esperava um delimitador ';', mas foi encontrado {self.token_atual()}","red"))
       exit()
-
+#(MODIFICADA POR ENTHONY) 
   # TODO: correções em declarações de variáveis, de forma que f_tipo() retorne uma string correspondente ao tipo da variável declarada (e que possivelmente será utilizada em outras partes da análise sintática e semântica)
   def f_declaracoes_variaveis(self):
     if self.token_atual() == 'var':
-      self.consumir('Palavra reservada')
-      self.f_lista_de_identificadores()
-      if self.token_atual() == ':':
-        self.consumir('Delimitador')
-        self.f_tipo()
-        if self.token_atual() == ';':
-          self.consumir('Delimitador')
-          self.f_declaracoes_variaveis() # Chama o método recursivamente
+        self.consumir('Palavra reservada')
+        self.f_lista_de_identificadores()
+        if self.token_atual() == ':':
+            self.consumir('Delimitador')
+            tipo_variavel = self.f_tipo()  # Obtem o tipo da variável
+            if self.token_atual() == ';':
+                self.consumir('Delimitador')
+                # Retorna o tipo para ser usado em outras partes da análise
+                return tipo_variavel, self.f_declaracoes_variaveis() 
   
   def f_parte_else(self):
     if self.token_atual() == 'else':
