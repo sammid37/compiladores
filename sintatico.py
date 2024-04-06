@@ -5,7 +5,13 @@
 from constantes import *
 from termcolor import colored
 from collections import deque
-       
+#(MODIFICADA POR ENTHONY) 
+# Definição de um identificador tipado para a análise semântica
+class IdentificadorTipado:
+    def __init__(self, identificador, tipo):
+        self.identificador = identificador
+        self.tipo = tipo       
+
 # Definição de um Analisador Sintático
 class Sintatico:
   def __init__(self, tokens):
@@ -20,6 +26,8 @@ class Sintatico:
     self.idsTipados = deque() # tupla <id, tipo>
     self.pilhaIdentificadores = [] # String (id)
     self.pilhaControleTipo = deque() # String (tipo)
+
+
 
   def token_atual(self):
     return self.tokens[self.posicao].value;
@@ -359,27 +367,67 @@ class Sintatico:
         print(colored(f"Esperava o delimitador ';', mas foi encontrado {self.token_atual()}","red"))
         exit()
            
-  def f_lista_de_identificadores(self):
-    """Analisa uma lista de identificadores na gramática."""
+  """def f_lista_de_identificadores(self):
+   #Analisa uma lista de identificadores na gramática.
     if self.tipo_atual() == 'Identificador':
       self.consumir('Identificador')  # Consome o primeiro identificador
       self.f_lista_de_identificadores_linha()  # Chama o método recursivamente 
     else:
       print(colored(f"Esperava um identificador, mas foi encontrado {self.token_atual()}","red"))
-      exit()
-      
-  def f_lista_de_identificadores_linha(self):
-    """Analisa o restante da lista de identificadores na gramática ou vazio caso não haja mais identificadores após a vírgula."""
-    if self.token_atual() == ',':
-      self.consumir('Delimitador')
-      if self.tipo_atual() == 'Identificador':
+      exit()"""
+  #(MODIFICADA POR ENTHONY) 
+  def f_lista_de_identificadores(self):
+    """Analisa uma lista de identificadores na gramática."""
+    # Inicializa a variável para controlar se o identificador já foi declarado
+    declarou = False
+    for identificador in self.pilhaIdentificadores:
+        if identificador != "$":
+            if identificador == self.token_atual():
+                declarou = True
+                break        
+    # Se o identificador já foi declarado, exibe uma mensagem de erro e encerra o programa
+    if declarou:
+        print(colored(f"O identificador '{self.token_atual()}' já foi declarado anteriormente.", "red"))
+        exit()
+    # Se o identificador não foi declarado anteriormente, adiciona-o à pilha de identificadores
+    self.pilhaIdentificadores.append(self.token_atual())
+    # Adiciona também o identificador ao token buffer
+    self.tokenBuffer.append(self.token_atual())
+    self.f_lista_de_identificadores_linha()  # Chama o método recursivamente
+    # Consome o identificador atual
+    if self.tipo_atual() == 'Identificador':
         self.consumir('Identificador')
-        self.f_lista_de_identificadores_linha() # Chama o método recursivamente 
-      else:
-        print(colored(f"Esperava um identificador após a vírgula, mas foi encontrado {self.token_atual()}","red"))
+    else:
+        print(colored(f"Esperava um identificador, mas foi encontrado {self.token_atual()}","red"))
+        exit()
+
+  #(MODIFICADA POR ENTHONY)     
+  def f_lista_de_identificadores_linha(self):
+    """Analisa uma lista de identificadores na gramática."""
+    # Inicializa a variável para controlar se o identificador já foi declarado
+    declarou = False
+    for identificador in self.pilhaIdentificadores:
+        if identificador != "$":
+            if identificador == self.token_atual():
+                declarou = True
+                break        
+    # Se o identificador já foi declarado, exibe uma mensagem de erro e encerra o programa
+    if declarou:
+        print(colored(f"O identificador '{self.token_atual()}' já foi declarado anteriormente.", "red"))
+        exit()
+    # Se o identificador não foi declarado anteriormente, adiciona-o à pilha de identificadores
+    self.pilhaIdentificadores.append(self.token_atual())
+    # Adiciona também o identificador ao token buffer
+    self.tokenBuffer.append(self.token_atual())
+    self.f_lista_de_identificadores_linha()  # Chama o método recursivamente
+    # Consome o identificador atual
+    if self.tipo_atual() == 'Identificador':
+        self.consumir('Identificador')
+    else:
+        print(colored(f"Esperava um identificador, mas foi encontrado {self.token_atual()}","red"))
         exit()
         
-  def f_lista_declaracoes_variaveis(self):
+  """def f_lista_declaracoes_variaveis(self):
     self.f_lista_de_identificadores() 
     if self.token_atual() == ':':
       self.consumir('Delimitador')  
@@ -396,7 +444,36 @@ class Sintatico:
         self.f_lista_declaracoes_variaveis_linha()  # Chama o método recursivamente
     else:
       print(colored(f"Esperava um delimitador ';', mas foi encontrado {self.token_atual()}","red"))
-      exit()
+      exit()"""
+  #(MODIFICADA POR ENTHONY) 
+  def f_lista_declaracoes_variaveis(self):
+          self.f_lista_de_identificadores() 
+          if self.token_atual() == ':':
+              self.consumir('Delimitador')  
+              tipo = self.f_tipo()  # Obtemos o tipo
+              # Cria objetos IdentificadorTipado para cada identificador na tokenBuffer
+              for identificador in self.tokenBuffer:
+                  self.idsTipados.append(IdentificadorTipado(identificador, tipo))
+              self.tokenBuffer = []  # Limpa o tokenBuffer
+              self.f_lista_declaracoes_variaveis_linha() # Chama o método recursivamente
+  #(MODIFICADA POR ENTHONY) 
+  def f_lista_declaracoes_variaveis_linha(self):
+      if self.token_atual() == ';':
+          self.consumir('Delimitador') 
+          self.f_lista_de_identificadores()
+          if self.token_atual() == ':':
+              self.consumir('Delimitador')
+              tipo = self.f_tipo()  # Obtemos o tipo
+              # Cria objetos IdentificadorTipado para cada identificador na tokenBuffer
+              for identificador in self.tokenBuffer:
+                  self.idsTipados.append(IdentificadorTipado(identificador, tipo))
+              self.tokenBuffer = []  # Limpa o tokenBuffer
+              self.f_lista_declaracoes_variaveis_linha()  # Chama o método recursivamente
+      else:
+          print(colored(f"Esperava um delimitador ';', mas foi encontrado {self.token_atual()}","red"))
+          exit()
+
+
 #(MODIFICADA POR ENTHONY) 
   # TODO: correções em declarações de variáveis, de forma que f_tipo() retorne uma string correspondente ao tipo da variável declarada (e que possivelmente será utilizada em outras partes da análise sintática e semântica)
   def f_declaracoes_variaveis(self):
