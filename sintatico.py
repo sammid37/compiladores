@@ -1,13 +1,11 @@
 # Construção de Compiladores
-# Analisador Sintático
+# Analisador Sintático e análise Semântica
 # Enthony e Samantha
 
 from pilha import Pilha
 from constantes import *
 from termcolor import colored
 from identificador_tipado import IdentificadorTipado     
-
-# Definição de um Analisador Sintático
 class Sintatico:
   def __init__(self, tokens):
     self.tokens = tokens # a lista de tokens (formado por uma tupla << value, type, line >>)
