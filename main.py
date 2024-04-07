@@ -12,16 +12,15 @@ from lexico import Lexer
 from sintatico import Sintatico
 
 def main(file_name):
-  # Defina o nome do arquivo de entrada (código fonte)
   source_code = file_name
   display_file_name = os.path.basename(file_name)
-  print(f"📃 Analisando o arquivo: {colored(display_file_name, 'light_grey')}")
+  print(f"📃 Analisando o arquivo: {display_file_name}")
   with open(source_code, 'r') as f: 
     source_code = f.read()
   # print(source_code)
 
-  # Defina o nome do arquivo de saída para o analisador léxico
-  lexer_file = "lex_output.csv"        # Ex.: 'outputs/lexer_o/result1.csv'
+  # Arquivo de saída para o analisador léxico
+  lexer_file = "lex_output.csv"
   open(lexer_file, 'w').close() # Limpa o conteúdo dos arquivos, se existirem
 
   # Realiza a análise léxica a partir de um código fonte
