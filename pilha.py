@@ -1,6 +1,7 @@
 # Construção de Compiladores
 # Implementação de Estrutura Pilha para a Análise Semântica
 # Enthony e Samantha
+
 class Pilha:
   def __init__(self):
     self.items = []
@@ -37,17 +38,3 @@ class Pilha:
   def exibirPilhaIdsTipados(self):
     for identificadorTipado in self.items:
       print(f"Identificador: {identificadorTipado.identificador}, Tipo: {identificadorTipado.tipo}")
-
-
-# # Exemplo de uso da pilha
-# pilha = Pilha()
-
-# pilha.empilhar("Elemento 1")
-# pilha.empilhar("Elemento 2")
-# pilha.empilhar("Elemento 3")
-# pilha.empilhar("Elemento 4")
-
-# # Lendo e removendo os elementos da pilha
-# while not pilha.vazia():
-#   elemento = pilha.desempilhar()
-#   print("Elemento lido:", elemento)
