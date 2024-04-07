@@ -1,3 +1,4 @@
+{Arquivo de Teste1}
 program Test1;
    var
       Area, Comprimento, Raio : real; 
