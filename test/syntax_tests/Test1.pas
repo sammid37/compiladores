@@ -4,7 +4,7 @@ program Test1;
    begin   
       Raio := 4;
       Area := 3.14 * Raio * Raio;
-      Comprimento := 2 * 3.14 * Raio;
+      Comprimento := 2 * 3.14 * Raio
 end.
 
 {testar multiplos espacos também}

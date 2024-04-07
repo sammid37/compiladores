@@ -3,11 +3,14 @@ var
    A, B, R, I : integer;
 begin
    for I := 1 to 5 do
-   begin
-      A := A * A;
-      B := B * A;
-      R := A + B;
-   end;
+	begin
+	for I := 1 to 5 do
+   		begin
+      			A := A * B;
+      			B := B * A;
+      			R := A + I
+   		end
+	end
 end.
 
 {utilizar mais de um for - encadeado}
