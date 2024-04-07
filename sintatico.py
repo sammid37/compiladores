@@ -340,7 +340,6 @@ class Sintatico:
       else:
         print(colored(f"Esperava símbolo de atribuição :=, mas foi encontrado {self.token_atual()}","red"))
         exit()   
-    # FIXME: entender o que pode estar dando errado no final do programa
     else:
       print(colored(f"Comando inválido. Recebido: {self.token_atual()} de tipo '{self.tipo_atual()}'.", "red"))
       exit()
