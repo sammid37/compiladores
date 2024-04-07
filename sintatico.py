@@ -52,7 +52,7 @@ class Sintatico:
           self.f_declaracoes_de_subprogramas() 
           self.f_comando_composto()
           if self.token_atual() == '.':
-            print(colored("✅ Análise sintática concluída com sucesso.", 'green'))
+            return
           else:
             print(colored(f"\tEsperava o delimitador '.', mas foi encontrado {self.token_atual()}","red"))
             exit()
@@ -106,7 +106,7 @@ class Sintatico:
 
         if self.token_atual() == ';':
           for identificador in self.tokenBuffer:
-            self.idsTipados.append(IdentificadorTipado(identificador, tipo))
+            self.idsTipados.empilhar(IdentificadorTipado(identificador, tipo))
           self.tokenBuffer = []  # Limpa o tokenBuffer
           self.consumir('Delimitador')
           self.f_lista_declaracoes_variaveis_linha()  # Chama o método recursivamente
@@ -194,13 +194,12 @@ class Sintatico:
           else: 
             self.pilhaIdentificadores.desempilhar()
             break
-        while not self.idsTipados.vazia():
-          identificador = self.idsTipados.desempilhar()
-          if identificador.identificador != "$":
-            continue
-          else:
+        for identificador in self.idsTipados:
+          if identificador.identificador != '$':
+            self.idsTipados.desempilhar()
+          else: 
+            self.idsTipados.desempilhar()
             break
-
         self.consumir('Delimitador') 
         self.f_declaracoes_de_subprogramas()
       else: 
@@ -389,12 +388,11 @@ class Sintatico:
       # Se o identificador tiver sido declarado, ele obtem o tipo a partir da pilha idsTipados para incluir na pilha de controle
       for identificador in self.idsTipados:
         if identificador.identificador == self.token_atual():
-          print(f"ta: {self.token_atual()}")
           self.pilhaControleTipo.empilhar(identificador.tipo)
           break
       self.consumir('Identificador') 
     else:
-      print(colored(f"Esperava um identificador, mas foi encontrado {self.token_atual()}","red"))
+      print(colored(f"Esperava uma variável, mas foi encontrado {self.token_atual()}","red"))
       exit()
   
   def f_op_aditivo(self):
@@ -428,10 +426,7 @@ class Sintatico:
   #* ----------------------------------->>> Fator
   def f_fator(self):
     if self.tipo_atual() == 'Identificador':
-      if self.token_atual() == '(':
-        self.f_id_com_argumentos()
-      else:
-        self.consumir('Identificador')
+      self.f_ativacao_procedimento()
     elif self.tipo_atual() == 'Número inteiro':
       self.consumir(self.tipo_atual())
       self.pilhaControleTipo.empilhar('integer')
@@ -467,7 +462,7 @@ class Sintatico:
     if self.token_atual() in OP_RELACIONAL: 
       self.f_op_relacional()
       self.f_expressao_simples()
-      self.f_expresao_linha() # Chama o método recursivamente
+      self.f_expressao_linha() # Chama o método recursivamente
       self.f_verificar_relacional()
   
   def f_expressao_simples(self):
@@ -505,16 +500,15 @@ class Sintatico:
     self.f_termo_linha() # Chama o método recursivamente
     
   def f_termo_linha(self):
-    # if self.token_atual() in OP_MULTIPLICATIVO:
     if self.tipo_atual() == 'Operador multiplicativo':
-      if self.token_atual == '*' or self.token_atual() == '/':
+      if self.token_atual() == '*' or self.token_atual() == '/':
         self.f_op_multiplicativo()
         self.f_fator()
         self.f_termo_linha() # Chama o método recursivamente
         self.f_verificar_aritmetica()
       elif self.token_atual() == 'and':
         self.f_op_multiplicativo()
-        self.fator()
+        self.f_fator()
         self.f_termo_linha() # Chama o método recursivamente
         self.f_verificar_logica()
 
@@ -560,8 +554,7 @@ class Sintatico:
       print(colored(f"Esperava o delimitador '(', mas foi encontrado {self.token_atual()}","red"))
       exit()    
 
-  #* --------------------------------------------------- VERIFICAÇÃO DE TIPOS
-  # TODO: Enthony
+  #* --------------------------------------------------- Métodos da Pilha Controle de Tipo
   def f_verificar_atribuicao(self):
     """Realiza a verificação de tipos para operações de atribuição."""
     top = self.pilhaControleTipo.desempilhar()
@@ -613,10 +606,8 @@ class Sintatico:
 
   def f_verificar_aritmetica(self):
     """Realiza a verificação de tipos para operações aritméticas."""
-    self.pilhaControleTipo.exbirPilhaIdentificadores()
     top = self.pilhaControleTipo.desempilhar()
     subtop = self.pilhaControleTipo.desempilhar()
-    print(f"topo: {top}\nsubtopo:{subtop}")
     if top == "integer" and subtop == "integer":
       self.pilhaControleTipo.empilhar("integer")
     elif top == "real" and subtop == "real":

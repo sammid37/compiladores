@@ -55,6 +55,7 @@ def main():
 
     sintatico = Sintatico(lista_tokens)
     sintatico.analisar()
+    print(colored("✅ Análise sintática e semântica concluída com sucesso.", 'green'))
 
   else:
     print(f"\nNão foi possível realizar a análise sintática e semântica, pois erros foram encontrados durante a análise léxica.")

@@ -3,79 +3,107 @@ program,Palavra reservada,1
 Test4,Identificador,1
 ;,Delimitador,1
 var,Palavra reservada,2
-A,Identificador,2
-",",Delimitador,2
-B,Identificador,2
-",",Delimitador,2
-R,Identificador,2
-",",Delimitador,2
-I,Identificador,2
-:,Delimitador,2
-integer,Palavra reservada,2
-;,Delimitador,2
-procedure,Palavra reservada,3
-teste,Identificador,3
-(,Delimitador,3
 A,Identificador,3
+",",Delimitador,3
+B,Identificador,3
+",",Delimitador,3
+R,Identificador,3
+",",Delimitador,3
+I,Identificador,3
 :,Delimitador,3
 integer,Palavra reservada,3
 ;,Delimitador,3
-B,Identificador,3
+J,Identificador,3
+",",Delimitador,3
+K,Identificador,3
 :,Delimitador,3
 real,Palavra reservada,3
-),Delimitador,3
 ;,Delimitador,3
-var,Palavra reservada,4
-S,Identificador,5
-",",Delimitador,5
-X,Identificador,5
+V,Identificador,3
+:,Delimitador,3
+boolean,Palavra reservada,3
+;,Delimitador,3
+procedure,Palavra reservada,5
+teste,Identificador,5
+(,Delimitador,5
+A,Identificador,5
+:,Delimitador,5
+integer,Palavra reservada,5
+;,Delimitador,5
+C,Identificador,5
+:,Delimitador,5
+boolean,Palavra reservada,5
+;,Delimitador,5
+T,Identificador,5
 :,Delimitador,5
 real,Palavra reservada,5
+),Delimitador,5
 ;,Delimitador,5
-begin,Palavra reservada,6
+var,Palavra reservada,6
 S,Identificador,7
-:=,Atribuição,7
-A,Identificador,7
-+,Operador aditivo,7
-B,Identificador,7
-*,Operador multiplicativo,7
+",",Delimitador,7
 X,Identificador,7
-end,Palavra reservada,8
-;,Delimitador,8
-begin,Palavra reservada,10
-while,Palavra reservada,11
-(,Delimitador,11
-I,Identificador,11
-<=,Operador relacional,11
-5,Número inteiro,11
-),Delimitador,11
-do,Palavra reservada,11
+:,Delimitador,7
+real,Palavra reservada,7
+;,Delimitador,7
+begin,Palavra reservada,8
+S,Identificador,9
+:=,Atribuição,9
+A,Identificador,9
++,Operador aditivo,9
+B,Identificador,9
+*,Operador multiplicativo,9
+X,Identificador,9
+end,Palavra reservada,10
+;,Delimitador,10
 begin,Palavra reservada,12
-A,Identificador,13
+for,Palavra reservada,13
+I,Identificador,13
 :=,Atribuição,13
-A,Identificador,13
-+,Operador aditivo,13
 1,Número inteiro,13
-;,Delimitador,13
-B,Identificador,14
-:=,Atribuição,14
-B,Identificador,14
--,Operador aditivo,14
-1,Número inteiro,14
-;,Delimitador,14
-R,Identificador,15
+to,Palavra reservada,13
+5,Número inteiro,13
+do,Palavra reservada,13
+begin,Palavra reservada,14
+V,Identificador,15
 :=,Atribuição,15
-A,Identificador,15
+7,Número inteiro,15
 +,Operador aditivo,15
-B,Identificador,15
+4,Número inteiro,15
+>,Operador relacional,15
+1,Número inteiro,15
+*,Operador multiplicativo,15
+2,Número inteiro,15
 ;,Delimitador,15
-I,Identificador,16
+J,Identificador,16
 :=,Atribuição,16
-I,Identificador,16
+1,Número inteiro,16
 +,Operador aditivo,16
 1,Número inteiro,16
 ;,Delimitador,16
-end,Palavra reservada,17
+A,Identificador,17
+:=,Atribuição,17
+1,Número inteiro,17
++,Operador aditivo,17
+1,Número inteiro,17
 ;,Delimitador,17
-end,Palavra reservada,18
-.,Delimitador,18
+B,Identificador,18
+:=,Atribuição,18
+B,Identificador,18
+-,Operador aditivo,18
+1,Número inteiro,18
+;,Delimitador,18
+R,Identificador,19
+:=,Atribuição,19
+A,Identificador,19
++,Operador aditivo,19
+3,Número inteiro,19
+;,Delimitador,19
+V,Identificador,20
+:=,Atribuição,20
+7,Número inteiro,20
+>,Operador relacional,20
+3,Número inteiro,20
+end,Palavra reservada,21
+end,Palavra reservada,22
+.,Delimitador,22
