@@ -1,3 +1,7 @@
+# Construção de Compiladores
+# Representação de Tokens
+# Enthony e Samantha
+
 class Token:
   def __init__(self, token_type, value, line, erro_sintatico = None):
     self.type = token_type
