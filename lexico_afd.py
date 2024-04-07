@@ -1,3 +1,9 @@
+# Construção de Compiladores
+# Analisador Léxico implementado com AFD
+# Enthony e Samantha
+
+# FIXME: precisa de ajustes para operar como a versão feita com regex!
+
 import csv
 
 class ComentarioNaoFechadoErro(Exception):
