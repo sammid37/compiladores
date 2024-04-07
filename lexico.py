@@ -3,11 +3,9 @@
 # Enthony e Samantha
 
 import re
-import csv
+from termcolor import colored
 
 from tokens import Token
-
-from termcolor import colored
 
 class Lexer:
   def __init__(self):
