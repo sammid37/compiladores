@@ -13,7 +13,7 @@ from sintatico import Sintatico
 
 def main():
   # Defina o nome do arquivo de entrada (código fonte)
-  source_code = "test/syntax_tests/Test3.pas"  # Ex.: 'test/syntax_tests/Test1.pas'
+  source_code = "test/syntax_tests/Test4.pas"  # Ex.: 'test/syntax_tests/Test1.pas'
   print(f"📃 Analisando o arquivo: {colored(source_code, 'cyan', 'on_cyan')}\n")
   with open(source_code, 'r') as f: 
     source_code = f.read()

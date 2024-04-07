@@ -21,10 +21,10 @@ class Sintatico:
     self.pilhaControleTipo = Pilha() # String (tipo)
 
   def token_atual(self):
-    return self.tokens[self.posicao].value;
+    return self.tokens[self.posicao].value
 
   def tipo_atual(self):
-    return self.tokens[self.posicao].type;
+    return self.tokens[self.posicao].type
 
   def avancar(self):
     self.posicao += 1
@@ -41,7 +41,7 @@ class Sintatico:
     """Realiza a análise sintática de um programa"""
     if self.token_atual() == 'program':
       self.pilhaIdentificadores.empilhar('$')
-      self.idsTipados.empilhar(('$', 'mark'))
+      self.idsTipados.empilhar(IdentificadorTipado('$', 'mark'))
       self.consumir('Palavra reservada')
       if self.tipo_atual() == 'Identificador':
         self.pilhaIdentificadores.empilhar(self.token_atual()) 
@@ -71,6 +71,7 @@ class Sintatico:
     if self.token_atual() == 'var':
       self.consumir('Palavra reservada')
       self.f_lista_declaracoes_variaveis()
+      self.f_declaracoes_variaveis()
 
   def f_lista_declaracoes_variaveis(self):
     """Obtém a lista de identificadores e o tipo, 
@@ -83,11 +84,10 @@ class Sintatico:
 
       if self.token_atual() == ';':
         for identificador in self.tokenBuffer:
-          self.idsTipados.append(IdentificadorTipado(identificador, tipo))
+          self.idsTipados.empilhar(IdentificadorTipado(identificador, tipo))
         self.tokenBuffer = []  # Limpa o tokenBuffer
         self.consumir('Delimitador')
         self.f_lista_declaracoes_variaveis_linha() # Chama o método recursivamente
-
       else: 
         print(colored(f"Esperava um delimitador ';', mas foi encontrado {self.token_atual()}","red"))
         exit()   
@@ -98,15 +98,24 @@ class Sintatico:
   def f_lista_declaracoes_variaveis_linha(self):
     """Obtém a lista de identificadores e o tipo, 
     em seguida empilha esses dados na pilha de IdsTipados"""
-    self.f_lista_de_identificadores()
-    if self.token_atual() == ':':
-      self.consumir('Delimitador')
-      tipo = self.f_tipo()  
+    if self.tipo_atual() == 'Identificador':
+      self.f_lista_de_identificadores()
+      if self.token_atual() == ':':
+        self.consumir('Delimitador')
+        tipo = self.f_tipo()  
 
-      for identificador in self.tokenBuffer:
-        self.idsTipados.append(IdentificadorTipado(identificador, tipo))
-      self.tokenBuffer = []  # Limpa o tokenBuffer
-      self.f_lista_declaracoes_variaveis_linha()  # Chama o método recursivamente
+        if self.token_atual() == ';':
+          for identificador in self.tokenBuffer:
+            self.idsTipados.append(IdentificadorTipado(identificador, tipo))
+          self.tokenBuffer = []  # Limpa o tokenBuffer
+          self.consumir('Delimitador')
+          self.f_lista_declaracoes_variaveis_linha()  # Chama o método recursivamente
+        else: 
+          print(colored(f"Esperava um delimitador ';', mas foi encontrado {self.token_atual()}","red"))
+          exit()   
+      else:      
+        print(colored(f"Esperava um delimitador ':', mas foi encontrado {self.token_atual()}","red"))
+        exit()   
 
   def f_lista_de_identificadores(self):
     """Analisa uma lista de identificadores na gramática e verifica
@@ -117,7 +126,9 @@ class Sintatico:
         if identificador != "$":
           if identificador == self.token_atual():
             declarou = True
-            break        
+            break     
+        else:
+          break   
       if declarou:
         print(colored(f"O identificador '{self.token_atual()}' já foi declarado anteriormente.", "red"))
         exit()
@@ -135,26 +146,30 @@ class Sintatico:
   def f_lista_de_identificadores_linha(self):
     """Analisa uma lista de identificadores na gramática e verifica
     se o identificador já foi declarado anteriormente."""
-    if self.tipo_atual() == 'Identificador':
-      declarou = False
-      for identificador in self.pilhaIdentificadores:
-        if identificador != "$":
-          if identificador == self.token_atual():
-            declarou = True
-            break        
-      if declarou:
-        print(colored(f"O identificador '{self.token_atual()}' já foi declarado anteriormente.", "red"))
-        exit()
+    if self.token_atual() == ',':
+      self.consumir('Delimitador')
+      if self.tipo_atual() == 'Identificador':
+        declarou = False
+        for identificador in self.pilhaIdentificadores:
+          if identificador != "$":
+            if identificador == self.token_atual():
+              declarou = True
+              break    
+          else:
+            break    
+        if declarou:
+          print(colored(f"O identificador '{self.token_atual()}' já foi declarado anteriormente.", "red"))
+          exit()
 
-      # Se o identificador não foi declarado anteriormente, 
-      # adiciona-o à pilha de identificadores e consome o token atual
-      self.pilhaIdentificadores.empilhar(self.token_atual())
-      self.tokenBuffer.append(self.token_atual())
-      self.consumir('Identificador')
-      self.f_lista_de_identificadores_linha()  # Chama o método recursivamente
-    else:
-      print(colored(f"Esperava um identificador, mas foi encontrado {self.token_atual()}","red"))
-      exit()
+        # Se o identificador não foi declarado anteriormente, 
+        # adiciona-o à pilha de identificadores e consome o token atual
+        self.pilhaIdentificadores.empilhar(self.token_atual())
+        self.tokenBuffer.append(self.token_atual())
+        self.consumir('Identificador')
+        self.f_lista_de_identificadores_linha()  # Chama o método recursivamente
+      else:
+        print(colored(f"Esperava um identificador, mas foi encontrado {self.token_atual()}","red"))
+        exit()
 
   def f_tipo(self):
     """Analisa o tipo de variável na gramática e retorna uma string correspondente."""
@@ -172,6 +187,20 @@ class Sintatico:
     if self.token_atual() == 'procedure':
       self.f_declaracao_de_subprograma()
       if self.token_atual() == ';':
+        # "Destrói" das pilhas as variáveis criadas após a finalização da subrotina
+        for identificador in self.pilhaIdentificadores:
+          if identificador != '$':
+            self.pilhaIdentificadores.desempilhar()
+          else: 
+            self.pilhaIdentificadores.desempilhar()
+            break
+        while not self.idsTipados.vazia():
+          identificador = self.idsTipados.desempilhar()
+          if identificador.identificador != "$":
+            continue
+          else:
+            break
+
         self.consumir('Delimitador') 
         self.f_declaracoes_de_subprogramas()
       else: 
@@ -179,23 +208,144 @@ class Sintatico:
         exit()
 
   def f_declaracao_de_subprograma(self):
-    """Analisa uma declaração de subprograma na gramática."""
+    """Analisa uma declaração de subprograma na gramática.
+    Verifica se o nome do subprograma não foi utilizado anteriormente."""
     if self.token_atual() == 'procedure':
       self.consumir('Palavra reservada') 
-      self.f_id()
-      self.f_argumentos()
-      if self.token_atual() == ';':
-        self.consumir('Delimitador')
-        self.f_declaracoes_variaveis()
-        self.f_declaracoes_de_subprogramas()
-        self.f_comando_composto()
+      if self.tipo_atual() == 'Identificador':
+        declarou = False
+        for identificador in self.pilhaIdentificadores:
+          if(identificador != '$'):
+           if(identificador == self.token_atual()):
+            declarou = True
+            break
+          else: 
+            break
+        if declarou:
+          print(colored(f"O identificador '{self.token_atual()}' já foi declarado anteriormente.", "red"))
+          exit()
+        else:
+          self.pilhaIdentificadores.empilhar(self.token_atual())
+          self.pilhaIdentificadores.empilhar('$') # novo escopo
+          self.idsTipados.empilhar(IdentificadorTipado('$','mark')) # novo escopo
+        self.consumir('Identificador')
+        self.f_argumentos() # Verifica se o identificador está acompanhado de args
+        if self.token_atual() == ';':
+          self.consumir('Delimitador')
+          self.f_declaracoes_variaveis()
+          self.f_declaracoes_de_subprogramas()
+          self.f_comando_composto()
+        else:
+          print(colored(f"Esperava o delimitador ';', mas foi encontrado {self.token_atual()}","red"))
+          exit()
       else:
-        print(colored(f"Esperava o delimitador ';', mas foi encontrado {self.token_atual()}","red"))  
+        print(colored(f"Esperava um identificador, mas foi encontrado {self.token_atual()}","red"))  
+        exit()
     else:
       print(colored(f"Esperava a palavra reservada 'procedure', mas foi encontrado {self.token_atual()}","red"))
       exit()
 
+  def f_argumentos(self):
+    """Analisa os argumentos na gramática."""
+    if self.token_atual() == '(':
+      self.consumir('Delimitador') 
+      self.f_lista_de_parametros()
+      if self.token_atual() == ')':
+        self.consumir('Delimitador') 
+      else:
+        print(colored(f"Esperava um delimitador ')', mas foi encontrado {self.token_atual()}","red"))
+        exit()
+
+  def f_lista_de_parametros(self):
+    """Analisa uma lista de parâmetros na gramática."""
+    self.f_lista_de_identificadores() 
+    if self.token_atual() == ':':
+      self.consumir('Delimitador')  
+      tipo = self.f_tipo()  
+      for identificador in self.tokenBuffer:
+        self.idsTipados.empilhar(IdentificadorTipado(identificador, tipo))
+      self.tokenBuffer = [] 
+      self.f_lista_de_parametros_linha()  # Chama o método recursivamente 
+    else: 
+      print(colored(f"Esperava um delimitador ':', mas foi encontrado {self.token_atual()}","red"))
+      exit()
+      
+  def f_lista_de_parametros_linha(self):
+    """Analisa uma linha de parâmetros na gramática."""
+    if self.token_atual() == ';':
+      self.consumir('Delimitador')  
+      self.f_lista_de_identificadores() 
+      if self.token_atual() == ':':
+        self.consumir('Delimitador') 
+        tipo = self.f_tipo()  
+        for identificador in self.tokenBuffer:
+          self.idsTipados.empilhar(IdentificadorTipado(identificador, tipo))
+        self.tokenBuffer = [] 
+        self.f_lista_de_parametros_linha()  # Chama o método recursivamente 
+      else: 
+        print(colored(f"Esperava um delimitador ':', mas foi encontrado {self.token_atual()}","red"))
+        exit()
+
 #* --------------------------------------------------- CMD COMPOSTO, OP, CMD E ETC       
+  def f_comando(self): 
+    """Analisa possibilidades de comando, como atribuição, 
+    ativações de procedimentos e outros"""
+    if self.tipo_atual() == 'Identificador' and self.tokens[self.posicao + 1].type == 'Atribuição':
+      self.f_variavel()
+      if self.tipo_atual() == 'Atribuição':
+        self.consumir('Atribuição')
+        self.f_expressao()
+      self.f_verificar_atribuicao()
+    elif self.tipo_atual() == 'Identificador':
+      self.f_ativacao_procedimento()
+    elif self.token_atual() == 'begin':
+      self.f_comando_composto()
+    elif self.token_atual() == 'if':
+      self.consumir('Palavra reservada')
+      self.f_expressao()
+      if self.token_atual() == 'then':
+        self.consumir("Palavra reservada")
+        self.f_comando()
+        self.f_parte_else()
+      else:
+        print(colored(f"Esperava um a palavra reservada then, mas foi encontrado {self.token_atual()}","red"))
+        exit()     
+    elif self.token_atual() == 'while':
+      self.consumir('Palavra reservada')
+      self.f_expressao()
+      if self.token_atual() == 'do':
+        self.consumir('Palavra reservada')
+        self.f_comando()
+      else: 
+        print(colored(f"Esperava um a palavra reservada do, mas foi encontrado {self.token_atual()}","red"))
+        exit()   
+    elif self.token_atual() == 'for':
+      self.consumir('Palavra reservada')
+      self.f_variavel()
+      if self.tipo_atual() == 'Atribuição':
+        self.consumir('Atribuição')
+        self.f_expressao()
+        self.f_verificar_atribuicao()
+        if self.token_atual() == 'to':
+          self.consumir('Palavra reservada')
+          self.f_expressao()
+          if self.token_atual() == 'do':
+            self.consumir('Palavra reservada')
+            self.f_comando_composto()
+          else:
+            print(colored(f"Esperava um a palavra reservada do, mas foi encontrado {self.token_atual()}","red"))
+            exit()   
+        else:
+          print(colored(f"Esperava um a palavra reservada to, mas foi encontrado {self.token_atual()}","red"))
+          exit()   
+      else:
+        print(colored(f"Esperava símbolo de atribuição :=, mas foi encontrado {self.token_atual()}","red"))
+        exit()   
+    # FIXME: entender o que pode estar dando errado no final do programa
+    else:
+      print(colored(f"Comando inválido. Recebido: {self.token_atual()} de tipo '{self.tipo_atual()}'.", "red"))
+      exit()
+      
   def f_comando_composto(self):
     if self.token_atual() == 'begin':
       self.consumir('Palavra reservada')
@@ -224,116 +374,31 @@ class Sintatico:
       self.f_comando()
       self.f_lista_comandos_linha() # Chama o método recursivamente
 
-  def f_comando(self): 
-    """Analisa possibilidades de comando, como atribuição, ativações de procedimentos e outros"""
-    if self.tipo_atual() == 'Identificador' and self.tokens[self.posicao + 1].type == 'Atribuição':
-      self.f_variavel();
-      if self.tipo_atual() == 'Atribuição':
-        self.consumir('Atribuição')
-        self.f_expressao()
-    elif self.tipo_atual() == 'Identificador':
-      self.f_ativacao_procedimento()
-    elif self.token_atual() == 'begin':
-      self.f_comando_composto()
-    elif self.token_atual() == 'if':
-      self.consumir('Palavra reservada')
-      self.f_expressao()
-      if self.token_atual() == 'then':
-        self.consumir("Palavra reservada")
-        self.f_comando()
-        self.f_parte_else()
-      else:
-        print(colored(f"Esperava um a palavra reservada then, mas foi encontrado {self.token_atual()}","red"))
-        exit()     
-    elif self.token_atual() == 'while':
-      self.consumir('Palavra reservada')
-      self.f_expressao()
-      if self.token_atual() == 'do':
-        self.consumir('Palavra reservada')
-        self.f_comando_composto()
-      else: 
-        print(colored(f"Esperava um a palavra reservada do, mas foi encontrado {self.token_atual()}","red"))
-        exit()   
-    elif self.token_atual() == 'for':
-      self.consumir('Palavra reservada')
-      self.f_variavel()
-      if self.tipo_atual() == 'Atribuição':
-        self.consumir('Atribuição')
-        self.f_expressao()
-        if self.token_atual() == 'to':
-          self.consumir('Palavra reservada')
-          self.f_expressao()
-          if self.token_atual() == 'do':
-            self.consumir('Palavra reservada')
-            self.f_comando_composto()
-          else:
-            print(colored(f"Esperava um a palavra reservada do, mas foi encontrado {self.token_atual()}","red"))
-            exit()   
-        else:
-          print(colored(f"Esperava um a palavra reservada to, mas foi encontrado {self.token_atual()}","red"))
-          exit()   
-      else:
-        print(colored(f"Esperava símbolo de atribuição :=, mas foi encontrado {self.token_atual()}","red"))
-        exit()   
-    else:
-      print(colored(f"Comando inválido. Recebido: {self.token_atual()} de tipo '{self.tipo_atual()}'.", "red"))
-      exit()
-
-  def f_variavel(self):
-    """Analisa uma variável na gramática."""
-    if self.tipo_atual() == 'Identificador':
-      self.consumir('Identificador') 
-    else:
-      print(colored(f"Esperava um identificador, mas foi encontrado {self.token_atual()}","red"))
-      exit()
-  
-  def f_lista_de_parametros(self):
-    """Analisa uma lista de parâmetros na gramática."""
-    self.f_lista_de_identificadores() 
-
-    if self.token_atual() == ':':
-      self.consumir('Delimitador')  
-      self.f_tipo()  
-      self.f_lista_de_parametros_linha()  # Chama o método recursivamente 
-    else: 
-      print(colored(f"Esperava um delimitador ':', mas foi encontrado {self.token_atual()}","red"))
-      exit()
-      
-  def f_lista_de_parametros_linha(self):
-    """Analisa uma linha de parâmetros na gramática."""
-    if self.token_atual() == ';':
-      self.consumir('Delimitador')  
-      self.f_lista_de_identificadores() 
-      if self.token_atual() == ':':
-        self.consumir('Delimitador') 
-        self.f_tipo()  
-        self.f_lista_de_parametros_linha()  # Chama o método recursivamente 
-    if self.token_atual() == ',':
-      self.consumir('Delimitador') 
-      self.f_lista_de_identificadores() 
-      if self.token_atual() == ':':
-        self.consumir('Delimitador')  
-        self.f_tipo()  
-        self.f_lista_de_parametros_linha() # Chama o método recursivamente
-
-  def f_argumentos(self):
-    """Analisa os argumentos na gramática."""
-    if self.token_atual() == '(':
-      self.consumir('Delimitador') 
-      self.f_lista_de_parametros()
-      if self.token_atual() == ')':
-        self.consumir('Delimitador') 
-      else:
-        print(colored(f"Esperava um delimitador ')', mas foi encontrado {self.token_atual()}","red"))
-        exit()
-
   def f_parte_else(self):
     if self.token_atual() == 'else':
       self.consumir(self.tipo_atual())
       self.f_comando()
 
+  #* ----------------------------------->>> Vars, sinais e operações
+  def f_variavel(self):
+    """Analisa uma variável na gramática."""
+    if self.tipo_atual() == 'Identificador':
+      if self.token_atual() not in self.pilhaIdentificadores:
+        print(colored(f"O identificador {self.token_atual()} não foi declarado anteriormente.","red"))
+        exit()
+      # Se o identificador tiver sido declarado, ele obtem o tipo a partir da pilha idsTipados para incluir na pilha de controle
+      for identificador in self.idsTipados:
+        if identificador.identificador == self.token_atual():
+          print(f"ta: {self.token_atual()}")
+          self.pilhaControleTipo.empilhar(identificador.tipo)
+          break
+      self.consumir('Identificador') 
+    else:
+      print(colored(f"Esperava um identificador, mas foi encontrado {self.token_atual()}","red"))
+      exit()
+  
   def f_op_aditivo(self):
-    if self.self.token_atual() in OP_ADITIVO:
+    if self.token_atual() in OP_ADITIVO:
       self.consumir(self.tipo_atual())
     else:
       print(colored(f"Esperava algum operador aditivo, mas foi encontrado {self.token_atual()}","red"))  
@@ -360,14 +425,22 @@ class Sintatico:
       print(colored(f"Esperava algum sinal, mas foi encontrado {self.token_atual()}","red"))
       exit()
 
+  #* ----------------------------------->>> Fator
   def f_fator(self):
     if self.tipo_atual() == 'Identificador':
       if self.token_atual() == '(':
         self.f_id_com_argumentos()
       else:
         self.consumir('Identificador')
-    elif self.tipo_atual() == 'Número inteiro' or self.tipo_atual() == 'Número real' or self.tipo_atual() in BOOLEAN_VALUES:
+    elif self.tipo_atual() == 'Número inteiro':
       self.consumir(self.tipo_atual())
+      self.pilhaControleTipo.empilhar('integer')
+    elif self.tipo_atual() == 'Número real':
+      self.consumir(self.tipo_atual())
+      self.pilhaControleTipo.empilhar('real')
+    elif self.tipo_atual() in BOOLEAN_VALUES:
+      self.consumir(self.tipo_atual())
+      self.pilhaControleTipo.empilhar('boolean')
     elif self.token_atual() == '(':
       self.consumir('Delimitador')
       self.f_expressao()
@@ -377,25 +450,25 @@ class Sintatico:
         print(colored(f"Esperava o delimitador ')', mas foi encontrado {self.token_atual()}","red"))  
         exit()     
     elif self.token_atual() == 'not':
+      self.pilhaControleTipo.empilhar('boolean')
       self.consumir('Palavra Reservada')
       self.f_fator()
+      self.f_verificar_logica()
     else:
       print(colored(f"Esperava um fator, mas foi encontrado {self.token_atual()}","red"))   
       exit()
-        
-  def f_id_com_argumentos(self):
-    self.consumir('Identificador')
-    if self.token_atual() == '(':
-      self.consumir('Delimitador')
-      self.f_lista_de_expressao()
-      if self.token_atual() == ')':
-        self.consumir('Delimitador')
-      else:
-        print(colored(f"Esperava o delimitador ')', mas foi encontrado {self.token_atual()}","red"))   
-        exit()       
-    else:
-      print(colored(f"Esperava o delimitador '(', mas foi encontrado {self.token_atual()}","red"))
-      exit()            
+          
+  #* ----------------------------------->>> Expressão
+  def f_expressao(self):
+    self.f_expressao_simples() 
+    self.f_expressao_linha() # Chama o método recursivamente
+ 
+  def f_expressao_linha(self):
+    if self.token_atual() in OP_RELACIONAL: 
+      self.f_op_relacional()
+      self.f_expressao_simples()
+      self.f_expresao_linha() # Chama o método recursivamente
+      self.f_verificar_relacional()
   
   def f_expressao_simples(self):
     if self.token_atual() in SINAL:
@@ -407,38 +480,56 @@ class Sintatico:
       self.f_expressao_simples_linha() # Chama o método recursivamente
  
   def f_expressao_simples_linha(self):
-    if self.token_atual() in OP_ADITIVO:
-      self.consumir(self.tipo_atual())
-      self.f_termo()
-      self.f_expressao_simples_linha() # Chama o método recursivamente
+    if self.tipo_atual() == 'Operador aditivo':
+      if self.token_atual() in SINAL:
+        self.f_op_aditivo()
+        self.f_termo()
+        self.f_expressao_simples_linha() # Chama o método recursivamente
+        self.f_verificar_aritmetica()
+      #  verificar se é 'or'
+      elif self.token_atual() == 'or':
+        self.f_op_aditivo()
+        self.f_termo()
+        self.f_expressao_simples_linha()
+        self.f_verificar_logica()
 
-  def f_expressao(self):
-    self.f_expressao_simples() 
-    self.f_expressao_linha() # Chama o método recursivamente
- 
-  def f_expressao_linha(self):
-    if self.token_atual() in OP_RELACIONAL: 
-      self.consumir(self.tipo_atual()) 
-      self.f_expressao_simples() # Chama o método recursivamente
- 
   def f_lista_de_expressao(self):
     self.f_expressao()  # Analisa a primeira expressão da lista
     while self.token_atual() == ',':
       self.consumir('Delimitador')  
       self.f_expressao()  
 
+  #* ----------------------------------->>> Termo
   def f_termo(self):
     self.f_fator() 
     self.f_termo_linha() # Chama o método recursivamente
     
   def f_termo_linha(self):
-    if self.token_atual() in OP_MULTIPLICATIVO:
-      self.consumir('Operador multiplicativo')  
-      self.f_fator()
-      self.f_termo_linha() # Chama o método recursivamente
-      
+    # if self.token_atual() in OP_MULTIPLICATIVO:
+    if self.tipo_atual() == 'Operador multiplicativo':
+      if self.token_atual == '*' or self.token_atual() == '/':
+        self.f_op_multiplicativo()
+        self.f_fator()
+        self.f_termo_linha() # Chama o método recursivamente
+        self.f_verificar_aritmetica()
+      elif self.token_atual() == 'and':
+        self.f_op_multiplicativo()
+        self.fator()
+        self.f_termo_linha() # Chama o método recursivamente
+        self.f_verificar_logica()
+
+  #* ----------------------------------->>> Ativação de Procedimento
   def f_ativacao_procedimento(self):
     if self.tipo_atual() == 'Identificador':
+      if self.token_atual() not in self.pilhaIdentificadores:
+        print(colored(f"O identificador {self.token_atual()} não foi declarado anteriormente.","red"))
+        exit()
+      # Se o identificador tiver sido declarado, ele obtem o tipo a partir da pilha idsTipados para incluir na pilha de controle
+      for identificador in self.idsTipados:
+        if identificador.identificador == self.token_atual():
+          self.pilhaControleTipo.empilhar(identificador.tipo)
+          break
+
       self.consumir('Identificador')  # Consome o identificador do procedimento
       self.f_ativacao_procedimento_linha() # Chama o método recursivamente
     else:
@@ -454,3 +545,89 @@ class Sintatico:
       else:
         print(colored(f"Esperava o delimitador ')', mas foi encontrado {self.token_atual()}","red"))
         exit()   
+
+  def f_id_com_argumentos(self):
+    self.consumir('Identificador')
+    if self.token_atual() == '(':
+      self.consumir('Delimitador')
+      self.f_lista_de_expressao()
+      if self.token_atual() == ')':
+        self.consumir('Delimitador')
+      else:
+        print(colored(f"Esperava o delimitador ')', mas foi encontrado {self.token_atual()}","red"))   
+        exit()       
+    else:
+      print(colored(f"Esperava o delimitador '(', mas foi encontrado {self.token_atual()}","red"))
+      exit()    
+
+  #* --------------------------------------------------- VERIFICAÇÃO DE TIPOS
+  # TODO: Enthony
+  def f_verificar_atribuicao(self):
+    """Realiza a verificação de tipos para operações de atribuição."""
+    top = self.pilhaControleTipo.desempilhar()
+
+    if self.pilhaControleTipo.topo() == "real" and top == "integer":
+      self.pilhaControleTipo.desempilhar()
+    elif self.pilhaControleTipo.topo() == top:
+      self.pilhaControleTipo.desempilhar()
+    else:
+      if self.token_atual() == "end":
+        print(colored(f"Erro: tipos incompatíveis em operação de atribuição na linha {self.tokens[self.posicao - 1].linha}", "red"))
+      else:
+        print(colored(f"Erro: tipos incompatíveis em operação de atribuição na linha {self.tokens[self.posicao].linha}", "red"))
+      exit()
+
+  def f_verificar_logica(self):
+    """Realiza a verificação de tipos para operações lógicas."""
+    top = self.pilhaControleTipo.desempilhar()
+    subtop = self.pilhaControleTipo.desempilhar()
+
+    if top == subtop:
+      self.pilhaControleTipo.empilhar("boolean")
+    else:
+      if self.token_atual() == "end":
+        print(colored(f"Erro: tipos incompatíveis em operação lógica na linha {self.tokens[self.posicao - 1].linha}", "red"))
+      else:
+        print(colored(f"Erro: tipos incompatíveis em operação lógica na linha {self.tokens[self.posicao].linha}", "red"))
+      exit()
+
+  def f_verificar_relacional(self):
+    """Realiza a verificação de tipos para operações relacionais."""
+    top = self.pilhaControleTipo.desempilhar()
+    subtop = self.pilhaControleTipo.desempilhar()
+
+    if top == "integer" and subtop == "integer":
+      self.pilhaControleTipo.empilhar("boolean")
+    elif top == "real" and subtop == "real":
+      self.pilhaControleTipo.empilhar("boolean")
+    elif top == "integer" and subtop == "real":
+      self.pilhaControleTipo.empilhar("boolean")
+    elif top == "real" and subtop == "integer":
+      self.pilhaControleTipo.empilhar("boolean")
+    else:
+        if self.token_atual() == "end":
+          print(colored(f"Erro: tipos incompatíveis em operação relacional na linha {self.tokens[self.posicao - 1].linha}", "red"))
+        else:
+          print(colored(f"Erro: tipos incompatíveis em operação relacional na linha {self.tokens[self.posicao].linha}", "red"))
+        exit()
+
+  def f_verificar_aritmetica(self):
+    """Realiza a verificação de tipos para operações aritméticas."""
+    self.pilhaControleTipo.exbirPilhaIdentificadores()
+    top = self.pilhaControleTipo.desempilhar()
+    subtop = self.pilhaControleTipo.desempilhar()
+    print(f"topo: {top}\nsubtopo:{subtop}")
+    if top == "integer" and subtop == "integer":
+      self.pilhaControleTipo.empilhar("integer")
+    elif top == "real" and subtop == "real":
+      self.pilhaControleTipo.empilhar("real")
+    elif top == "integer" and subtop == "real":
+      self.pilhaControleTipo.empilhar("real")
+    elif top == "real" and subtop == "integer":
+      self.pilhaControleTipo.empilhar("real")
+    else:
+      if self.token_atual() == "end":
+        print(colored(f"Erro: tipos incompatíveis em operação aritmética na linha {self.tokens[self.posicao - 1].line}", "red"))
+      else:
+        print(colored(f"Erro: tipos incompatíveis em operação aritmética na linha {self.tokens[self.posicao].line}", "red"))
+      exit()

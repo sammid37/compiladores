@@ -29,6 +29,15 @@ class Pilha:
   def __iter__(self):
     """Iterando em ordem inversa, como se estivéssimos desempilhando"""
     return iter(self.items[::-1])
+  
+  def exbirPilhaIdentificadores(self):
+    for i in self.items:
+      print(f"Conteúdo da pilha: {i}")
+
+  def exibirPilhaIdsTipados(self):
+    for identificadorTipado in self.items:
+      print(f"Identificador: {identificadorTipado.identificador}, Tipo: {identificadorTipado.tipo}")
+
 
 # # Exemplo de uso da pilha
 # pilha = Pilha()
