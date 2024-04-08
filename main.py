@@ -64,6 +64,6 @@ if __name__ == "__main__":
   test_files_directory = "test/syntax_tests/"
   # Realizando a execução dos 5 arquivos de teste
   # Se um deles falhar, o próximo não poderá ser testado
-  for i in range(1, 6):
+  for i in range(1, 7):
     file_name = os.path.join(test_files_directory, f"Test{i}.pas")
     main(file_name)
