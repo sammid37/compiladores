@@ -564,9 +564,9 @@ class Sintatico:
       self.pilhaControleTipo.desempilhar()
     else:
       if self.token_atual() == "end":
-        print(colored(f"Erro: tipos incompatíveis em operação de atribuição na linha {self.tokens[self.posicao - 1].linha}", "red"))
+        print(colored(f"Erro: tipos incompatíveis em operação de atribuição na linha {self.tokens[self.posicao - 1].line}", "red"))
       else:
-        print(colored(f"Erro: tipos incompatíveis em operação de atribuição na linha {self.tokens[self.posicao].linha}", "red"))
+        print(colored(f"Erro: tipos incompatíveis em operação de atribuição na linha {self.tokens[self.posicao].line}", "red"))
       exit()
 
   def f_verificar_logica(self):
@@ -578,9 +578,9 @@ class Sintatico:
       self.pilhaControleTipo.empilhar("boolean")
     else:
       if self.token_atual() == "end":
-        print(colored(f"Erro: tipos incompatíveis em operação lógica na linha {self.tokens[self.posicao - 1].linha}", "red"))
+        print(colored(f"Erro: tipos incompatíveis em operação lógica na linha {self.tokens[self.posicao - 1].line}", "red"))
       else:
-        print(colored(f"Erro: tipos incompatíveis em operação lógica na linha {self.tokens[self.posicao].linha}", "red"))
+        print(colored(f"Erro: tipos incompatíveis em operação lógica na linha {self.tokens[self.posicao].line}", "red"))
       exit()
 
   def f_verificar_relacional(self):
