@@ -34,8 +34,8 @@ class Sintatico:
 
   def consumir(self, tipo):
     """Método responsável por consumir o tipo de um token, verificando o tipo esperado"""
-    if self.verificar(tipo): 
-      self.avancar()
+    if self.tipo_atual() == tipo: 
+      self.posicao += 1
 
   def analisar(self):
     """Realiza a análise sintática de um programa"""
@@ -445,7 +445,7 @@ class Sintatico:
         exit()     
     elif self.token_atual() == 'not':
       self.pilhaControleTipo.empilhar('boolean')
-      self.consumir('Palavra Reservada')
+      self.consumir('Palavra reservada')
       self.f_fator()
       self.f_verificar_logica()
     else:
@@ -532,7 +532,7 @@ class Sintatico:
   def f_ativacao_procedimento_linha(self):
     if self.token_atual() == '(':
       self.consumir('Delimitador')  
-      self.f_lista_de_expressoes()  
+      self.f_lista_de_expressao()  
       if self.token_atual() == ')':
         self.consumir('Delimitador')
       else:
